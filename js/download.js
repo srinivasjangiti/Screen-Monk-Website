@@ -17,27 +17,25 @@
   // They are intentionally data-driven so no other code needs to change.
   // ---------------------------------------------------------------------------
   var CONFIG = {
-    // Hosted as a GitHub Release asset (not committed to this repo).
-    // Vercel does not fetch Git LFS files at deploy time, so committing
-    // the EXE resulted in a 134-byte LFS pointer being served instead
-    // of the actual 123 MB installer.
-    //
-    // Pinned to v3.0.4 (NOT /releases/latest/) so the browser follows
-    // one fewer redirect — `/latest/` 302s to the version tag first.
-    // To publish a new version:
-    //   1. gh release create vX.Y.Z ./Screen Monk-Setup-X.Y.Z.exe
-    //   2. bump the two URLs below + the version field
-    //   3. push the website
-    installer: "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/download/v3.0.4/Screen.Monk-Setup-3.0.4.exe",
+    // Hosted on Vercel Blob (same origin, served from Vercel's CDN edge).
+    // Same-origin download means Chrome's cross-origin / Safe Browsing
+    // download policies can't interfere with the binary fetch — this
+    // fixes the "File wasn't available on site" error some Chrome
+    // installs threw at the previous GitHub-Releases URL.
+    //   - To publish a new version:
+    //     1. vercel blob put ./Screen Monk-Setup-X.Y.Z.exe Screen Monk-Setup-X.Y.Z.exe --access public
+    //     2. bump the two URLs below + the version field
+    //     3. push the website
+    //   - Free tier: 1 GB storage, 10K reads, 2K writes, 10 GB transfer
+    //   - Store: screen-monk-installers (store_YERjXft9MG2rZKcW)
+    installer: "https://yerjxft9mg2rzkcw.public.blob.vercel-storage.com/Screen%20Monk-Setup-3.0.4.exe",
     // Portable build is in progress; for now both buttons point at the
     // installer. Replace with the portable URL + size when ready.
-    portable:  "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/download/v3.0.4/Screen.Monk-Setup-3.0.4.exe",
+    portable:  "https://yerjxft9mg2rzkcw.public.blob.vercel-storage.com/Screen%20Monk-Setup-3.0.4.exe",
     // Release page (used as a fallback link if the direct download fails).
     releasePage: "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/tag/v3.0.4",
     // What the browser should name the file when the user saves it
-    // (overrides the URL-derived name, which has a dot where the
-    // original filename has a space — GitHub release storage normalizes
-    // spaces to dots on upload).
+    // (overrides the URL-derived name).
     saveAs: "Screen Monk-Setup-3.0.4.exe",
     version: "3.0.4",
     sizeInstaller: "~123 MB",
