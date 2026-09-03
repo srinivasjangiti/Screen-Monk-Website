@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Sign in — Screen Monk</title>
+
+  <!--
+    ============================================================
+    CLERK CONFIG — single source of truth.
+    Swap CLERK_PUBLISHABLE_KEY below when you create a new Clerk
+    app. The script URL is derived from it at load time, so a
+    hostname mismatch (the bug from the last integration) is
+    impossible by construction. If the key is missing or malformed,
+    sign-in.js will fail loudly in the console and refuse to mount.
+    ============================================================
+  -->
+  <meta name="clerk-publishable-key" content="pk_test_ZGlzdGluY3QtZ2VsZGluZy04MDE0LmNsZXJrLmFjY291bnRzLmRldiQ" />
+  <meta name="clerk-js-version" content="5" />
+
+  <!--
+    Security headers (defense in depth — set these in HTTP response
+    headers at the host as well). The Clerk frontend API is allowed
+    for script-src, connect-src, frame-src, and worker-src. The
+    inline <style> block and Clerk's runtime style injection require
+    'unsafe-inline' for style-src — same trade-off as the main page.
+    NOTE: frame-ancestors is intentionally NOT set via meta — the
+    browser ignores it there. The host's HTTP response header is the
+    authoritative source for clickjacking protection.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com data:;
+    img-src 'self' data: https://img.clerk.com https://*.clerk.com;
+    connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com;
+    frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev;
+    worker-src 'self' blob:;
+    base-uri 'self';
+    form-action 'self';
+    object-src 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Permissions-Policy" content="
+    camera=(),
+    microphone=(),
+    geolocation=(),
+    payment=(),
+    usb=(),
+    magnetometer=(),
+    accelerometer=(),
+    gyroscope=(),
+    interest-cohort=();" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' fill='%2305080f'/><path d='M24 8 C 30 18, 34 24, 34 31 a10 10 0 0 1 -20 0 C 14 24, 18 18, 24 8 Z' fill='none' stroke='%23c9d6e3' stroke-width='1.4' stroke-linecap='round'/><circle cx='24' cy='31' r='2.2' fill='%23c9d6e3'/></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Sign-in page — same cold palette as the rest of the site. */
+    .signin {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      background: #05080f;
+      color: #c9d6e3;
+    }
+    .signin__panel {
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    .signin__mark {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 28px;
+      display: block;
+    }
+    .signin__title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 32px;
+      letter-spacing: 0.01em;
+      margin: 0 0 12px;
+      color: #e7eef5;
+    }
+    .signin__lede {
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #8d9bab;
+      margin: 0 0 36px;
+    }
+    .signin__lede em {
+      color: #c9d6e3;
+      font-style: normal;
+    }
+    #clerk-signin {
+      /* Clerk's default mount fills the container. */
+      min-height: 360px;
+    }
+    .signin__error {
+      font-family: 'Jost', sans-serif;
+      font-size: 13px;
+      color: #d3a3a3;
+      margin-top: 24px;
+      display: none;
+    }
+    .signin__error.is-visible {
+      display: block;
+    }
+    .signin__back {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #6b7a8c;
+      text-decoration: none;
+    }
+    .signin__back:hover {
+      color: #c9d6e3;
+    }
+  </style>
+</head>
+<body data-cold>
+  <a class="signin__back" href="index.html">← back</a>
+
+  <main class="signin">
+    <div class="signin__panel">
+      <svg class="signin__mark" viewBox="0 0 48 48" fill="none" stroke="#c9d6e3" stroke-width="1.4" stroke-linecap="round" aria-hidden="true">
+        <path d="M24 6 C 30 16, 34 22, 34 30 a10 10 0 0 1 -20 0 C 14 22, 18 16, 24 6 Z" opacity="0.85"/>
+        <circle cx="24" cy="30" r="2.4" fill="#c9d6e3" stroke="none"/>
+      </svg>
+
+      <h1 class="signin__title">Sign in to Screen Monk</h1>
+      <p class="signin__lede">
+        This is a one-time sign-in. Your screen-time data <em>never</em> leaves your machine &mdash; sign-in only proves a real person is using the app.
+      </p>
+
+      <div id="clerk-signin" role="region" aria-label="Sign in form"></div>
+      <p class="signin__error" id="signinError" role="alert"></p>
+    </div>
+  </main>
+
+  <script src="js/sign-in.js" defer></script>
+</body>
+</html>

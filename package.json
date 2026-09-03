@@ -1,0 +1,16 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "description": "A single, continuous, scroll-driven descent through seven cold mountain scenes, ending in the only warmth on the entire site: the download. Built as one soul — no build step, no framework, no dependencies. Vanilla HTML, CSS, and JS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

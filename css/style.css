@@ -1,0 +1,1186 @@
+/* =========================================================
+   SCREEN MONK — a quiet record of your hours
+   One cold soul. Warmth appears only at the very end.
+   ========================================================= */
+
+/* ---------- Tokens ---------- */
+:root {
+  /* Cold world — present everywhere except the final section */
+  --void:        #05080f;   /* near-black blue ground                */
+  --night:       #0a0f1a;
+  --ice:         #eaf1f8;   /* pale blue-white text                  */
+  --ice-dim:     #c8d6e6;   /* subtext / secondary                   */
+  --ice-faint:   #96a8ba;
+  --mist:        rgba(201, 214, 227, 0.06);
+
+  /* The single permitted warmth — final section only */
+  --ember:       #e6a35c;
+  --ember-soft:  #f0c089;
+  --ember-glow:  rgba(230, 163, 92, 0.35);
+
+  /* Type */
+  --serif: "Cormorant Garamond", "Times New Roman", serif;
+  --sans:  "Jost", "Helvetica Neue", Arial, sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);          /* slow, considered out */
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --t-slow: 2200ms;
+  --t-med:  1400ms;
+  --t-fast: 600ms;
+
+  /* Layout */
+  --rail-w: 150px;
+  --gutter: clamp(1.5rem, 5vw, 5rem);
+
+  /* Letterbox height — drives the cinematic frame AND the offset of
+     fixed UI (brand, sound) so they sit just below the bar instead
+     of being covered by it. 0 by default, 32px when body.is-cinematic. */
+  --letterbox-h: 0px;
+}
+
+/* ---------- Reset ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  background: var(--void);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--sans);
+  font-weight: 300;
+  color: var(--ice);
+  background: var(--void);
+  overflow-x: hidden;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  /* freeze the body until preloader releases it. 100svh (not 100vh) keeps
+     the body's locked height consistent with the scenes' min-height on
+     iOS Safari, where the URL bar changes the visual viewport. */
+  &.is-loading { overflow: hidden; height: 100svh; }
+}
+
+img { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--ember-glow); color: #fff; }
+
+/* =========================================================
+   PERSISTENT CROSS-FADE SCENERY STACK
+   All seven images live in this single fixed stack. Opacity
+   is driven continuously by scroll in scene.js so the images
+   cross-dissolve into one continuous world — the "one soul".
+   ========================================================= */
+.scenery {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: var(--void);
+  overflow: hidden;
+}
+.scenery__layer {
+  position: absolute; inset: -8% 0;
+  opacity: 0;
+}
+.scenery__layer img {
+  width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1.05);
+  filter: saturate(0.85) brightness(0.95) contrast(1.02);
+}
+.scenery__fog {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 50% at 50% 80%, rgba(201,214,227,0.08), transparent 70%),
+    linear-gradient(180deg, rgba(5,8,15,0.30) 0%, transparent 22%, transparent 60%, rgba(5,8,15,0.50) 100%);
+  pointer-events: none;
+}
+
+/* =========================================================
+   PERSISTENT ATMOSPHERE LAYERS
+   Fixed, full-viewport, non-interactive. These are what
+   unify the seven photographs into one continuous world.
+   ========================================================= */
+
+/* Global cool color grade over every image */
+.grade {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 30%, transparent 40%, rgba(5,8,15,0.55) 100%),
+    linear-gradient(180deg, rgba(8,13,24,0.35) 0%, transparent 30%, transparent 70%, rgba(5,8,15,0.55) 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+  transition: opacity 1800ms var(--ease);
+}
+/* When warmth arrives, ease the grade back so the amber can breathe */
+body.is-warm .grade { opacity: 0.35; }
+
+.vignette {
+  position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  background: radial-gradient(130% 100% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+}
+
+/* Snowfall canvases (content lives in js/snow.js) */
+.snow {
+  position: fixed; inset: 0; pointer-events: none;
+}
+.snow--back  { z-index: 4; opacity: 0.85; }
+.snow--front { z-index: 6; opacity: 1; }
+
+/* Subtle film grain */
+.grain {
+  position: fixed; inset: -50%; z-index: 7; pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 8s steps(6) infinite;
+}
+@keyframes grain {
+  0%   { transform: translate(0,0); }
+  20%  { transform: translate(-3%, 2%); }
+  40%  { transform: translate(2%, -3%); }
+  60%  { transform: translate(-2%, -2%); }
+  80%  { transform: translate(3%, 1%); }
+  100% { transform: translate(0,0); }
+}
+
+/* Thin cinematic letterbox bars */
+.letterbox {
+  position: fixed; inset: 0; z-index: 8; pointer-events: none;
+}
+.letterbox::before, .letterbox::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 0;
+  background: var(--void);
+  pointer-events: none;
+  transition: height 1200ms var(--ease);
+}
+.letterbox::before { top: 0; }
+.letterbox::after  { bottom: 0; }
+body.is-cinematic {
+  /* When the cinematic frame is on, fixed UI (brand, sound) must
+     clear the 32px top bar. Flip the variable and let the calc
+     on those elements slide them in sync with the letterbox. */
+  --letterbox-h: 32px;
+}
+body.is-cinematic .letterbox::before,
+body.is-cinematic .letterbox::after { height: var(--letterbox-h); }
+
+/* =========================================================
+   PRELOADER
+   ========================================================= */
+.preloader {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--void);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2.5rem;
+  transition: opacity 1600ms var(--ease), visibility 0s linear 1600ms;
+}
+.preloader.is-done { opacity: 0; visibility: hidden; }
+
+.preloader__mark { text-align: center; color: var(--ice); }
+.preloader__glyph {
+  display: flex; justify-content: center;
+  color: var(--ice-dim);
+  animation: breathe 5s var(--ease) infinite;
+}
+.preloader__word {
+  margin-top: 1.2rem;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  letter-spacing: 0.18em;
+}
+.preloader__line {
+  width: min(220px, 50vw); height: 1px;
+  background: rgba(201,214,227,0.12); overflow: hidden;
+}
+.preloader__line span {
+  display: block; height: 100%; width: 0%;
+  background: linear-gradient(90deg, transparent, var(--ice) 50%, transparent);
+  transition: width 400ms var(--ease);
+}
+.preloader__hint {
+  font-size: 0.7rem; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--ice-faint);
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 0.9; transform: scale(1.04); }
+}
+
+/* =========================================================
+   FIXED UI — brand, chapter rail, sound, scroll hint
+   ========================================================= */
+.brand {
+  position: fixed;
+  /* base offset + letterbox height, so the logo clears the 32px
+     cinematic bar when it slides in. Animates in sync. */
+  top: calc(1.8rem + var(--letterbox-h));
+  left: 2rem;
+  z-index: 30; display: inline-flex; align-items: center; gap: 0.8rem;
+  color: var(--ice);
+  text-decoration: none;
+  transition:
+    top 1200ms var(--ease),
+    color var(--t-med) var(--ease),
+    opacity var(--t-med) var(--ease);
+}
+.brand__glyph {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  opacity: 1;
+  filter: drop-shadow(0 2px 8px rgba(5,8,15,0.7));
+}
+.brand__glyph img { width: 40px; height: 40px; object-fit: contain; }
+.brand__word {
+  font-family: var(--serif); font-size: 1.2rem; font-weight: 400;
+  letter-spacing: 0.2em; line-height: 1;
+  text-shadow: 0 1px 16px rgba(5,8,15,0.8);
+}
+body.is-warm .brand { color: var(--ember-soft); }
+body.is-warm .brand__word { text-shadow: 0 1px 16px rgba(20,12,6,0.6); }
+
+/* Right-side chapter rail */
+.rail {
+  position: fixed; right: var(--gutter); top: 50%;
+  transform: translateY(-50%); z-index: 30;
+}
+.rail ul { list-style: none; display: flex; flex-direction: column; gap: 1.1rem; }
+.rail a {
+  display: flex; align-items: center; gap: 0.8rem;
+  color: var(--ice-faint);
+  transition: color var(--t-fast) var(--ease);
+}
+.rail__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; opacity: 0.4;
+  transition: transform var(--t-med) var(--ease), opacity var(--t-fast) var(--ease), background var(--t-med) var(--ease);
+}
+.rail__label {
+  font-size: 0.66rem; letter-spacing: 0.22em; text-transform: uppercase;
+  opacity: 0; transform: translateX(6px);
+  transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease);
+}
+.rail a:hover .rail__label,
+.rail a.is-active .rail__label { opacity: 1; transform: translateX(0); }
+.rail a:hover { color: var(--ice); }
+.rail a.is-active { color: var(--ice); }
+.rail a.is-active .rail__dot { transform: scale(1.6); opacity: 1; }
+body.is-warm .rail a.is-active { color: var(--ember); }
+body.is-warm .rail a.is-active .rail__dot { background: var(--ember); }
+
+/* Sound toggle — circular, sits centered directly below the
+   "skip to download" rectangle inside the shared .top-cta-stack
+   container. The disc is the secondary action; the download is
+   the primary. Frosted disc + slightly thicker border so it
+   has presence without shouting. Positioning is owned by the
+   container — this rule only styles the disc itself. */
+.sound {
+  width: 44px; height: 44px;
+  /* line-height: 0 is critical — without it the button inherits
+     a 25.6px line box, the 20px SVG sits at the text baseline,
+     and the icon drifts to the top of the disc. font-size: 0
+     removes any inline-text metrics on the same path. */
+  line-height: 0;
+  font-size: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ice-faint);
+  border: 1px solid rgba(201,214,227,0.22);
+  border-radius: 50%;
+  background: rgba(8, 12, 22, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  transition:
+    color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+/* The icon wrapper. Block-level so it doesn't sit on a text
+   baseline. The SVG inside has explicit width/height (20x20),
+   so the wrapper takes exactly that size and centers cleanly. */
+.sound__icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  line-height: 0;
+}
+.sound__icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.sound:hover {
+  color: var(--ice);
+  border-color: rgba(201,214,227,0.45);
+  background: rgba(20, 28, 44, 0.55);
+  transform: scale(1.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+.sound:focus-visible {
+  outline: none;
+  border-color: var(--ice);
+  box-shadow: 0 0 0 3px rgba(201,214,227,0.18), 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Playing state — the icon lights up, waves are drawn. */
+.sound[data-state="playing"] {
+  color: var(--ice);
+  border-color: rgba(201,214,227,0.45);
+  background: rgba(20, 28, 44, 0.6);
+}
+.sound[data-state="playing"]:hover {
+  border-color: var(--ice);
+}
+
+/* Icon layers — opacity-driven so the swap is a soft crossfade,
+   not a hard cut. */
+.sound__waves,
+.sound__hint {
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease);
+}
+.sound[data-state="playing"] .sound__waves { opacity: 1; }
+.sound[data-state="blocked"] .sound__hint  { opacity: 1; }
+.sound[data-state="blocked"]:hover .sound__hint { opacity: 0.6; }
+
+/* Blocked state — the browser refused autoplay. The button does a
+   gentle, slow ping so the user understands "this needs your tap",
+   not "this is broken". Pauses on hover so the user can read the
+   icon without distraction. */
+.sound[data-state="blocked"] {
+  color: var(--ice);
+  border-color: rgba(201,214,227,0.35);
+}
+.sound[data-state="blocked"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(201,214,227,0.55);
+  pointer-events: none;
+  opacity: 0;
+  animation: sound-ping 2.4s var(--ease) infinite;
+}
+.sound[data-state="blocked"]:hover::after { animation: none; opacity: 0; }
+
+@keyframes sound-ping {
+  0%   { opacity: 0.55; transform: scale(1); }
+  80%  { opacity: 0;    transform: scale(1.55); }
+  100% { opacity: 0;    transform: scale(1.55); }
+}
+
+/* Warm scene — switch the palette from ice to ember. The ping
+   also tints warm so it doesn't feel disconnected. */
+body.is-warm .sound { border-color: rgba(230,163,92,0.3); background: rgba(26, 14, 6, 0.45); }
+body.is-warm .sound:hover { color: var(--ember-soft); border-color: rgba(230,163,92,0.55); background: rgba(40, 22, 10, 0.55); }
+body.is-warm .sound[data-state="playing"] { color: var(--ember-soft); border-color: rgba(230,163,92,0.55); background: rgba(40, 22, 10, 0.6); }
+body.is-warm .sound[data-state="blocked"] { color: var(--ember-soft); border-color: rgba(230,163,92,0.5); }
+body.is-warm .sound[data-state="blocked"]::after { border-color: rgba(230,163,92,0.6); }
+body.is-warm .sound:focus-visible { box-shadow: 0 0 0 3px rgba(230,163,92,0.22), 0 4px 20px rgba(0, 0, 0, 0.5); }
+
+/* On the small viewports, the disc shrinks a touch (42px). The
+   container's positioning and gap are set in the unified mobile
+   block further down, which keeps the whole stack consistent. */
+@media (max-width: 640px) {
+  .sound { width: 42px; height: 42px; }
+}
+
+/* =========================================================
+   AUTOPLAY-BLOCKED FALLBACK OVERLAY
+   When the browser refuses to autoplay, audio.js shows this
+   transparent full-screen click target. The user's first
+   scroll / click / tap / keypress anywhere on the page is
+   captured here and starts the music. The hint at the bottom
+   makes the affordance discoverable; the click target itself
+   is invisible so it doesn't disrupt the scene.
+
+   z-index 25 sits below the brand, rail, and sound button
+   (all z-30), so those stay interactable. The first scroll
+   on the page is captured here; clicks on the sound button
+   or the brand still go to their own handlers.
+   ========================================================= */
+.music-start {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  background: transparent;
+  cursor: pointer;
+  /* The element exists only to capture input — no border,
+     no padding, no visual. */
+}
+.music-start[hidden] { display: none; }
+
+.music-start__hint {
+  position: absolute;
+  bottom: clamp(2.2rem, 6vh, 3.6rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ice-faint);
+  pointer-events: none; /* never block the parent's click */
+  text-shadow: 0 1px 18px rgba(5, 8, 15, 0.95);
+  animation: music-start-breathe 2.8s var(--ease) infinite;
+}
+.music-start__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+.music-start__dot:nth-child(2) { animation-delay: 0.4s; }
+.music-start__dot:nth-child(3) { animation-delay: 0.8s; }
+.music-start__dot,
+.music-start__label {
+  animation-name: music-start-fade;
+  animation-duration: 2.8s;
+  animation-iteration-count: infinite;
+  animation-timing-function: var(--ease);
+}
+.music-start__label { animation-delay: 1.2s; }
+
+@keyframes music-start-breathe {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, 0); }
+  50%      { opacity: 1;    transform: translate(-50%, -2px); }
+}
+@keyframes music-start-fade {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+body.is-warm .music-start__hint { color: var(--ember-soft); }
+
+/* =========================================================
+   THE SEVEN SCENES
+   ========================================================= */
+.scenes { position: relative; z-index: 1; }
+
+.scene {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+/* Content column */
+.scene__content {
+  position: relative; z-index: 5;
+  width: min(760px, 86vw);
+  padding: 0 var(--gutter);
+  text-align: center;
+  text-wrap: balance;
+}
+.scene__content--center { margin: auto; }
+.scene__content--top {
+  margin-top: 10vh;
+}
+
+/* Scene 7 (The Return) — split layout.
+   The image is a sunset with a large tree on the LEFT half and a sun
+   glow on the RIGHT half. The composition mirrors the photo:
+   - Text column sits over the tree (LEFT) — the dark trunk and lower
+     canopy give the headline and lede a high-contrast surface to
+     read against.
+   - CTA column sits over the sun glow (RIGHT) — the bright sky and
+     the sun's halo give the buttons a clean, warm backdrop.
+   The two columns are vertically aligned to each other and the row
+   sits in the upper third of the viewport so the tree's canopy
+   frames the composition from above and the snow ground anchors it
+   from below. */
+#scene-7 { align-items: flex-start; }
+#scene-7 .scene__content {
+  width: min(1180px, 94vw);
+  margin-top: 22vh;
+  text-align: center;
+  display: grid;
+  /* Asymmetric: text column takes the available left space (over
+     the tree), CTA column is auto-sized and pinned to the right
+     edge so the buttons sit in the clean sky past the tree's
+     right branches. 1fr/auto is what keeps the buttons clear of
+     the tree — a 1fr/1fr split centered the buttons under the
+     branches. */
+  grid-template-columns: 1fr auto;
+  /* align-items: end drops the row's contents to the bottom of the
+     row's line-box — the button now sits at the bottom of the row
+     instead of being centered against the headline. The translateX
+     on the column below nudges the button a touch to the right. */
+  align-items: end;
+  gap: clamp(2rem, 4vw, 3rem);
+}
+#scene-7 .scene__col--text {
+  /* Constrain the text to the tree's trunk area. 60ch is wide
+     enough that the first line ("Take a small piece of stillness,")
+     fits on one row at the bumped display size — combined with
+     the explicit <br> after the comma, the headline reads as
+     exactly 2 lines. The lede inside this column has its own
+     narrower 36ch cap so it stays inside the tree's mass. The
+     translate is a small visual nudge — right and up — so the
+     headline sits a touch inside the canopy. */
+  max-width: 60ch;
+  margin: 0 auto;
+  text-align: center;
+  transform: translate(18px, -14px);
+}
+#scene-7 .scene__col--cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Drop the CTA further down and push it further right — the
+     button now sits low in the frame (near the figure / credits
+     level) and shifts toward the right edge of the sun glow.
+     Enough offset that the row reads as two distinct beats
+     (lede up here, button down there) rather than a paired
+     cluster. */
+  transform: translate(40px, 200px);
+}
+#scene-7 .display {
+  font-size: clamp(1.8rem, 3.4vw, 2.55rem);
+  line-height: 1.12; margin-bottom: 1.1rem;
+}
+#scene-7 .lede {
+  font-size: clamp(0.93rem, 1.1vw, 1.02rem);
+  max-width: 36ch; margin: 0 auto 0.2rem;
+  /* Color & shadow are owned by .lede--warm (set on the element).
+     Keep this rule to sizing & rhythm only — anything more would
+     fight the warm variant. */
+}
+#scene-7 .cta { margin-top: 1.6rem; gap: 0.75rem; }
+#scene-7 .cta__btn {
+  padding: 0.85rem 2rem;
+  min-width: 260px;  /* both buttons share a width — reads as a pair */
+}
+
+/* Split layout — the grid on #scene-7 .scene__content handles the
+   two-column placement. The .scene__content--split class is kept
+   on the element as a hook (and for the per-column rules below)
+   but doesn't impose its own flex layout. */
+.scene__content--split {
+  /* No display override — the scene-7 grid owns the layout. */
+}
+.scene__col--text {
+  text-align: center;
+}
+.scene__col--cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* The split layout already gives the CTA its position; the inner
+   margin-top on .cta was sized for the old stacked layout. */
+.scene__col--cta .cta { margin-top: 0; }
+
+/* Reveal animations — elements start invisible & lifted, JS adds .is-in */
+.display {
+  font-family: var(--serif); font-weight: 300;
+  font-size: clamp(2.4rem, 6.2vw, 5rem);
+  line-height: 1.06; letter-spacing: -0.005em;
+  color: #ffffff;
+  text-shadow: 0 2px 40px rgba(5,8,15,0.7), 0 0 80px rgba(5,8,15,0.4);
+  margin-bottom: 1.6rem;
+  opacity: 0; transform: translateY(22px);
+  transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
+}
+/* Scene 1 is the hero. The <br> is the only intended break — pin the h1
+   to nowrap so the text doesn't try to balance-wrap "Somewhere, someone
+   is not" onto a second line. Size capped at 3.5rem so the first part
+   fits the 760px content column on a 1920px viewport. */
+#scene-1 .display {
+  font-size: clamp(2.2rem, 4.4vw, 3.5rem);
+  line-height: 1.08;
+  white-space: nowrap;
+  text-wrap: wrap;
+}
+/* On small viewports the nowrap would push the first line wider than
+   the column — let it wrap naturally and the <br> still gives 2 lines. */
+@media (max-width: 700px) {
+  #scene-1 .display { white-space: normal; }
+}
+.display em { font-style: italic; font-weight: 400; color: var(--ember-soft); }
+.lede {
+  font-family: var(--sans); font-weight: 300;
+  font-size: clamp(1.02rem, 1.5vw, 1.2rem);
+  line-height: 1.85; letter-spacing: 0.015em;
+  color: var(--ice-dim);
+  /* single, clean dark drop shadow — strong enough to read on bright
+     backgrounds without needing per-scene "halo" stacks or color flips */
+  text-shadow: 0 1px 24px rgba(5,8,15,0.78);
+  max-width: 46ch; margin: 0 auto;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity var(--t-slow) var(--ease) 120ms, transform var(--t-slow) var(--ease) 120ms;
+}
+
+.scene.is-in .display { opacity: 1; transform: none; }
+.scene.is-in .lede { opacity: 1; transform: none; }
+
+/* ---------- Top-right CTA cluster ----------
+   A small group of two fixed-position buttons: the rectangular
+   "skip to download" shortcut glued to the right edge (its
+   right side sits flush at the gutter, exactly where it was
+   before the music disc was introduced), and the circular
+   music toggle immediately to its right. They share a single
+   positioning context (.top-cta-stack) so they read as one
+   visual unit. The container is shifted right by the disc
+   width + gap so the download's right edge stays anchored to
+   the gutter while the disc slots in further right.
+   align-items: center keeps the disc vertically centered
+   against the taller rectangle. The whole group is hidden on
+   the warm scene (7) where the download is the main event. */
+.top-cta-stack {
+  position: fixed;
+  top: calc(1.8rem + var(--letterbox-h));
+  /* Shift the container right by (disc width + gap) so the
+     download button's right edge lands at the gutter while
+     the disc sits further right. The disc is 44px (.sound),
+     the gap is 0.5rem. */
+  right: calc(var(--gutter) - 44px - 0.5rem);
+  z-index: 30;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  /* Defensive: if either child is hidden (warm scene), the
+     container collapses gracefully instead of leaving a gap. */
+  pointer-events: none;
+}
+.top-cta-stack > * { pointer-events: auto; }
+
+/* ---------- Top-right shortcut: "skip to download" ----------
+   A clear rectangular button with a download icon —
+   unmistakable as a CTA even on the quietest scene. Dark
+   semi-transparent fill so the box reads against any
+   background, ice border, bright text. Hover lifts it 1px
+   and brightens the border. Sizing and visibility are now
+   controlled by the .top-cta-stack wrapper above. */
+.skip-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 1.1rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ice);
+  text-decoration: none;
+  background: rgba(10, 15, 26, 0.72);
+  border: 1px solid rgba(201, 214, 227, 0.45);
+  border-radius: 3px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 12px rgba(5, 8, 15, 0.4);
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+.skip-download:hover {
+  background: rgba(20, 30, 50, 0.85);
+  border-color: rgba(201, 214, 227, 0.75);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(5, 8, 15, 0.55);
+}
+.skip-download:focus-visible {
+  outline: 1px solid rgba(201, 214, 227, 0.8);
+  outline-offset: 3px;
+}
+.skip-download__icon {
+  display: block;
+  flex-shrink: 0;
+  transition: transform var(--t-fast) var(--ease);
+}
+.skip-download:hover .skip-download__icon { transform: translateY(2px); }
+
+/* Warm scene owns the download — the whole shortcut cluster
+   is redundant here, and the disc now sits where the main
+   "Download for Windows" CTA lives, so it would overlap.
+   Hide the entire stack with visibility (not display) so
+   the layout doesn't reflow. The ember palette rules below
+   for .sound become unreachable on the warm scene but are
+   kept as a safety net for any future layout that puts
+   the disc back in view. */
+body.is-warm .top-cta-stack { visibility: hidden; pointer-events: none; }
+
+/* Mobile: same cluster, slightly tighter. The container
+   right-offset still needs to account for the disc width
+   + gap so the disc doesn't clip off-screen on narrow
+   viewports (gutter shrinks below 44px+gap at small widths). */
+@media (max-width: 640px) {
+  .top-cta-stack {
+    /* 1.2rem mobile gutter minus 44px disc minus 0.45rem gap
+       = keeps the download glued to the right edge and the
+       disc just outside it. */
+    right: calc(1.2rem - 44px - 0.45rem);
+    gap: 0.45rem;
+  }
+  .skip-download {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+  }
+}
+
+/* ---------- Soft tonal veil behind text on bright scenes ----------
+   On scenes where the background can wash out the lede (bright sky on 3,
+   peach sunset on 4, bright snow through 5), drop a soft halo behind
+   the text block so the words still read. Rules:
+     - veil element is inset:0 (matches the content box) so the dark
+       area can't extend past the content bounds
+     - gradient is 45% x 55% — slightly taller than wide, hugs the
+       text block vertically and stays inside the text on the sides
+     - center opacity 0.40 then 5-stop falloff to transparent at 100%
+       so the area beyond the text is fully clear
+     - matches the cold world's dark blue, not pure black, so it harmonises
+   The headline still rides on its own drop shadow; the veil just lifts
+   the tonal floor under the lede so the words don't dissolve. */
+#scene-3 .scene__content::before,
+#scene-4 .scene__content::before,
+#scene-5 .scene__content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 45% 55% at center,
+    rgba(5,8,15,0.40) 0%,
+    rgba(5,8,15,0.25) 20%,
+    rgba(5,8,15,0.12) 40%,
+    rgba(5,8,15,0.05) 65%,
+    transparent 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+/* Scene 7 — no halo behind the CTA. Previous warm-dark plate was
+   reading as a visible card silhouette, not a soft fall-off. The
+   buttons carry their own weight: solid ember on the primary, full-
+   opacity ember border on the ghost. The sun glow becomes a feature
+   behind them, not something the buttons have to fight. */
+
+/* Scene 5 (The Bowl) — the background photo has a rocky mountain-peak
+   silhouette sitting in its lower-center. The default flex-centering
+   drops the bowl action right onto the peak. Top-anchor the content so
+   the bowl sits in the snow-drift area above the peak and the mountain
+   reads as scenery below, not as backdrop to the button. */
+#scene-5 { align-items: flex-start; }
+#scene-5 .scene__content {
+  margin: 5vh auto 0;
+  /* Slightly compress the headline — three lines of 5rem serif was
+     eating the bowl's breathing room. */
+}
+#scene-5 .display {
+  font-size: clamp(2rem, 4.6vw, 3.2rem);
+  line-height: 1.08;
+  margin-bottom: 1.2rem;
+}
+#scene-5 .lede { margin-bottom: 1.4rem; }
+
+/* Scene 2 (The Descent) — keep copy fully visible.
+   The global 2.2s fade-in is too slow relative to the
+   scroll band, so the text was never reaching full opacity
+   on a normal scroll-through. Force it on once the section
+   is the active one, with no fade-out on exit. */
+#scene-2.is-in .display,
+#scene-2.is-in .lede { opacity: 1; transform: none; transition-duration: 600ms; }
+#scene-2 .display,
+#scene-2 .lede { opacity: 1; transform: none; }
+
+/* Scene 2 (The Descent) — display & lede get a darker, more grounded
+   voice. The headline "You arrive without a door to open." picks up
+   a strong dark drop shadow on top of its existing glow, so the line
+   lands with weight against the bright peak in the background. The
+   lede shifts to near-black ink with the same subtle sideways shadow
+   as before — reads as a darker, more pressed-onto-the-page voice,
+   not the usual light cool subtext. */
+#scene-2 .display {
+  text-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.95),
+    0 2px 40px rgba(5, 8, 15, 0.7),
+    0 0 80px rgba(5, 8, 15, 0.4);
+}
+#scene-2 .lede {
+  /* near-black with a hair of cool — darker than --ice-faint, but
+     still belongs to the cold world. Pushed well past the previous
+     gray toward true ink. */
+  color: #0a0e15;
+  /* sideways shadow: small horizontal offset, no vertical drop. Feels
+     like the line is being gently lit from the right, not pressed down. */
+  text-shadow: 1.5px 0 14px rgba(5, 8, 15, 0.55);
+}
+
+/* Warm variants — final section only */
+.display--warm { color: #fff5e6; text-shadow: 0 2px 50px rgba(230,163,92,0.35); }
+.lede--warm {
+  color: var(--ember-soft);
+  text-shadow: 0 1px 20px rgba(5,8,15,0.5);
+}
+
+/* The scene 7 lede sits over the tree's foliage — busy, dark, but not
+   dark enough to give the warm cream text a clean surface. Drop a
+   softly-blurred radial gradient behind it for contrast. The blur is
+   the whole point: a sharp gradient on a rectangular box would clip
+   to a visible card edge (a previous attempt did exactly that).
+   filter: blur() rounds the edges into a true halo, with no panel,
+   no border, no UI element — just darker air around the text. Cold
+   (not warm) on purpose: warmth is reserved for the button. */
+#scene-7 .lede--warm {
+  position: relative;
+  z-index: 0;
+  /* keep the warm yellow (--ember-soft) — the warm section's whole
+     point is that this is the only moment of warmth. The halo and
+     the 3-stop shadow give it the contrast it needs to read on
+     the dark tree without losing the ember tone. */
+  color: var(--ember-soft);
+  text-shadow:
+    0 0 1px rgba(5, 8, 15, 1),
+    0 0 8px rgba(5, 8, 15, 0.9),
+    0 0 20px rgba(5, 8, 15, 0.55);
+}
+#scene-7 .lede--warm::before {
+  content: "";
+  position: absolute;
+  /* small box, then a heavy blur — the blur is what softens the edge
+     so the gradient never shows its rectangular boundary */
+  inset: -0.6rem -2rem;
+  background: radial-gradient(
+    ellipse 65% 80% at center,
+    rgba(5, 8, 15, 0.78) 0%,
+    rgba(5, 8, 15, 0.50) 40%,
+    transparent 75%
+  );
+  filter: blur(18px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* =========================================================
+   THE VAULT (scene 6) — privacy counter
+   ========================================================= */
+.counter {
+  list-style: none; margin-top: 3rem;
+  display: inline-flex; align-items: baseline; gap: 1.4rem;
+  padding: 1.2rem 2rem;
+  border-top: 1px solid rgba(201,214,227,0.12);
+  border-bottom: 1px solid rgba(201,214,227,0.12);
+}
+.counter li { display: inline-flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+.counter__n {
+  font-family: var(--serif); font-weight: 300;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  color: #f2f6fb; line-height: 1;
+}
+.counter__u {
+  /* 0.18em (was 0.28em): the original spacing was tuned for single
+     words like SENT / KNOWN. Multi-word labels like BYTES SENT
+     and WHO KNOW YOU read as broken-up with that much air. */
+  font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+  /* --ice-dim (was --ice-faint): the faint token was tuned for things
+     that should sit *below* the visual line — the counter labels are
+     carrying meaning now, they need to be readable, not ornamental. */
+  color: var(--ice-dim);
+  /* subtle shadow lifts the small caps off the busy cave background
+     without darkening the letterforms themselves. */
+  text-shadow: 0 1px 12px rgba(5, 8, 15, 0.85);
+  white-space: nowrap;
+}
+.counter__sep { font-family: var(--serif); font-size: 2rem; color: var(--ice-faint); opacity: 0.4; }
+
+/* =========================================================
+   THE RETURN (scene 7) — download CTA, the only warmth
+   ========================================================= */
+.cta {
+  margin-top: 2.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  width: 100%;
+}
+.cta__btn {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  padding: 1.1rem 2.6rem;
+  border-radius: 2px;
+  transition: transform var(--t-med) var(--ease), background var(--t-med) var(--ease),
+              color var(--t-med) var(--ease), border-color var(--t-med) var(--ease),
+              box-shadow var(--t-med) var(--ease);
+}
+.cta__btn--primary {
+  background: var(--ember);
+  color: #1a0f04;
+  box-shadow: 0 0 0 0 var(--ember-glow);
+}
+.cta__btn--primary:hover {
+  transform: translateY(-2px);
+  background: var(--ember-soft);
+  box-shadow: 0 18px 50px -12px var(--ember-glow);
+}
+.cta__btn--ghost {
+  /* Clean outline button — no fill, just the ember border and dark
+     text. The previous rgba(20,12,6,0.18) backdrop was reading as
+     a visible "card" silhouette around the button, fighting the
+     warm minimalist aesthetic of the final scene. A real ghost
+     button is transparent fill + border only. The dark text matches
+     the primary's text color so both buttons read clearly on the
+     warm peach sky behind them. */
+  border: 1px solid var(--ember);
+  color: #1a0f04;
+  font-weight: 400;
+  background: transparent;
+}
+.cta__btn--ghost:hover {
+  transform: translateY(-2px);
+  background: rgba(230, 163, 92, 0.10);
+  border-color: var(--ember-soft);
+  color: #1a0f04;
+}
+.cta__label { font-size: 0.95rem; letter-spacing: 0.04em; font-weight: 400; }
+.cta__sub { font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.7; }
+.cta__btn--primary .cta__sub { opacity: 0.55; }
+.cta__note {
+  margin-top: 0.4rem;
+  font-size: 0.72rem; letter-spacing: 0.04em;
+  color: var(--ember-soft); opacity: 0.8;
+}
+/* While download.js is still resolving the real links, the buttons must
+   not be clickable (they would otherwise jump to the top via href="#"). */
+.cta__btn[data-ready="false"] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+/* On non-Windows the link target doesn't exist; the button is a polite
+   notice rather than a real call to action. */
+.cta__btn[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: saturate(0.6);
+}
+.cta__btn[aria-disabled="true"]:hover {
+  transform: none;
+  background: var(--ember);
+  box-shadow: 0 0 0 0 var(--ember-glow);
+}
+
+/* =========================================================
+   CREDITS PHASE — a dedicated moment after Scene 7.
+   Not a footer, not a sidebar. Reads like the end of a
+   quiet film: the picture is over, the room is dark, and
+   the credits rise up slowly. Cold throughout — warmth
+   belongs to the button above, never reused here.
+
+   Layout (top → bottom):
+     1. thin rule  ·  brand mark  ·  thin rule
+     2. tiny build tag (v1.0.1 · Windows · ~87 MB)
+     3. breathing room
+     4. "made quietly by"
+     5. author name (serif, larger, but cold)
+     6. breathing room
+     7. social links (dot-separated, no decoration)
+     8. email (the faintest line)
+     9. breathing room
+    10. year (roman numerals — quiet final beat)
+   ========================================================= */
+.credits-phase {
+  position: relative;
+  min-height: 100vh;          /* a full-screen moment, not a strip */
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 var(--gutter);
+  background:
+    radial-gradient(ellipse at 50% 0%,
+      rgba(15,22,34,1) 0%,
+      rgba(8,12,20,1) 60%,
+      rgba(5,8,15,1) 100%);
+  /* Sits a hair darker than the scene's own vignette, so
+     the scroll from scene 7 → credits reads as a slow
+     darken rather than a cut. */
+  text-align: center;
+  color: var(--ice-faint);
+}
+.credits-phase__inner {
+  display: flex; flex-direction: column; align-items: center;
+  max-width: 36rem;
+  width: 100%;
+  padding: 4rem 0 5rem;        /* tight top, looser bottom — block
+                                  sits centered, with the
+                                  meditative weight slightly
+                                  biased downward */
+}
+
+/* Brand mark — thin rule either side, like a film leader
+   line. The text between is the only thing with a touch
+   of weight in the whole block. */
+.credits-phase__brand {
+  display: flex; align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 28rem;
+}
+.credits-phase__rule {
+  flex: 0 0 auto;
+  width: clamp(2rem, 18vw, 8rem);
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(201,214,227,0.28) 50%,
+    transparent 100%);
+}
+.credits-phase__brand-text {
+  font-size: 0.62rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ice-dim);
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+/* Tiny build tag — almost invisible. Just confirms the
+   thing you just downloaded is a real thing. */
+.credits-phase__tag {
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ice-faint);
+  opacity: 0.55;
+  margin: 0 0 5rem;
+}
+
+/* "made quietly by" — the bridge between the build tag
+   and the name. Dim, italic, cold. */
+.credits-phase__made {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  color: var(--ice-faint);
+  opacity: 0.75;
+  margin: 0 0 1.4rem;
+}
+
+/* Author name — the one piece of type that gets a real
+   size. Serif. But cold: ice, not ember. The warmth has
+   already been spent. */
+.credits-phase__name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.55rem;
+  letter-spacing: 0.14em;
+  color: var(--ice);
+  margin: 0 0 3rem;
+}
+
+/* Social links — single quiet row, dot-separated, no
+   underline, no border, no ribbon tracking. */
+.credits-phase__links {
+  list-style: none;
+  display: flex; flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem 0.9rem;
+  margin: 0 0 2.4rem;
+  padding: 0;
+}
+.credits-phase__links a {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ice-dim);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease);
+}
+.credits-phase__links a:hover { color: var(--ice); }
+.credits-phase__links li:not(:last-child)::after {
+  content: "·";
+  margin-left: 0.9rem;
+  color: var(--ice-faint);
+  opacity: 0.5;
+}
+
+/* Contact line — email up top, phone on its own line below.
+   Two separate paragraphs, no separator. Reads as two quiet
+   facts, not a single composed line. */
+.credits-phase__contact,
+.credits-phase__phone {
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  color: var(--ice-dim);
+  opacity: 1;
+  margin: 0;
+}
+.credits-phase__contact { margin-bottom: 1.2rem; }   /* a little
+                                                         breathing
+                                                         room between
+                                                         the two */
+.credits-phase__phone    { margin: 0; }
+.credits-phase__contact a,
+.credits-phase__phone a {
+  color: var(--ice-dim);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease);
+}
+.credits-phase__contact a:hover,
+.credits-phase__phone a:hover { color: var(--ice); }
+
+/* Year in roman numerals — the closing beat. Small,
+   faint, set apart with breathing room. */
+.credits-phase__year {
+  font-family: var(--serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.5em;
+  color: var(--ice-faint);
+  opacity: 0.45;
+  margin: 0;
+  padding-left: 0.5em;       /* optical center for tracked type */
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  .rail { display: none; }
+  .brand__word { display: none; }
+  .scene__content { width: 92vw; }
+  .counter { gap: 0.8rem; padding: 1rem 1.2rem; flex-wrap: wrap; justify-content: center; }
+  /* Split layout collapses to a centered stack on narrow viewports.
+     The tree/sun pairing is a desktop composition; on phone the text
+     and CTA should read as one continuous flow. */
+  .scene__content--split {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .scene__col--text,
+  .scene__col--cta {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 560px) {
+  :root { --gutter: 1.2rem; }
+  .scene__content { text-align: center; }
+  .counter__sep { display: none; }
+  .counter { gap: 1.4rem 1.6rem; }
+}
+
+/* =========================================================
+   REDUCED MOTION — strip the animation, keep the meaning
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .scenery__layer { opacity: 1 !important; }
+  .scenery__layer:not(:first-child) { opacity: 0 !important; }
+  .scenery__layer:first-child { opacity: 1 !important; }
+  .display, .lede { opacity: 1 !important; transform: none !important; }
+  .grain { animation: none !important; }
+}

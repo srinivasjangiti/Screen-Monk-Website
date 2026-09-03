@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+
+  <!--
+    Security headers (defense in depth — set these in HTTP response headers
+    at the host as well; meta tags are a second layer for static hosting
+    that doesn't add headers). The inline <script> audio module + the
+    inline debug overlay force 'unsafe-inline' for script-src; that's a
+    known and accepted trade-off for keeping the single-file, no-build
+    architecture intact. Style 'unsafe-inline' is needed for the
+    favicon SVG data: URL and for the style attributes set by the audio
+    module's debug overlay.
+    NOTE: frame-ancestors is intentionally NOT set via meta — the
+    browser ignores it there. The host's HTTP response header is the
+    authoritative source for clickjacking protection.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com data:;
+    img-src 'self' data:;
+    media-src 'self';
+    connect-src 'self';
+    base-uri 'self';
+    form-action 'self';
+    object-src 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Permissions-Policy" content="
+    camera=(),
+    microphone=(),
+    geolocation=(),
+    payment=(),
+    usb=(),
+    magnetometer=(),
+    accelerometer=(),
+    gyroscope=(),
+    interest-cohort=();" />
+
+  <!-- Favicon: the monk's mark, inlined so no extra request -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' fill='%2305080f'/><path d='M24 8 C 30 18, 34 24, 34 31 a10 10 0 0 1 -20 0 C 14 24, 18 18, 24 8 Z' fill='none' stroke='%23c9d6e3' stroke-width='1.4' stroke-linecap='round'/><circle cx='24' cy='31' r='2.2' fill='%23c9d6e3'/></svg>" />
+
+  <title>Screen Monk — A quiet record of your hours.</title>
+  <meta name="description" content="Screen Monk watches the time your screen takes, remembers it privately on your own machine, and never asks you to feel bad about any of it. For Windows." />
+  <meta name="author" content="Screen Monk" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Screen Monk" />
+  <meta property="og:description" content="A quiet record of your hours. Private, local, unhurried. For Windows." />
+  <meta property="og:image" content="Images/1.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-cold>
+
+  <!-- ============ PRELOADER ============ -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__mark">
+      <div class="preloader__glyph" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+          <path d="M24 6 C 30 16, 34 22, 34 30 a10 10 0 0 1 -20 0 C 14 22, 18 16, 24 6 Z" opacity="0.85"/>
+          <circle cx="24" cy="30" r="2.4" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <p class="preloader__word">Screen Monk</p>
+    </div>
+    <div class="preloader__line"><span id="preloaderBar"></span></div>
+    <p class="preloader__hint" id="preloaderHint">the mountain is gathering snow</p>
+  </div>
+
+  <!-- ============ PERSISTENT CROSS-FADE BACKGROUND STACK ============ -->
+  <!-- All seven images live here, fixed, stacked. Opacity is driven
+       continuously by scroll in scene.js so they cross-dissolve
+       smoothly into one continuous world (the "one soul" layer). -->
+  <div class="scenery" id="scenery" aria-hidden="true">
+    <div class="scenery__layer" data-img="0"><img data-src="Images/1.jpg" alt="" /></div>
+    <div class="scenery__layer" data-img="1"><img data-src="Images/2.jpg" alt="" /></div>
+    <div class="scenery__layer" data-img="2"><img data-src="Images/3.jpg" alt="" /></div>
+    <div class="scenery__layer" data-img="3"><img data-src="Images/4.jpg" alt="" /></div>
+    <div class="scenery__layer" data-img="4"><img data-src="Images/5.jpg" alt="" /></div>
+    <div class="scenery__layer" data-img="5"><img data-src="Images/6.jpg" alt="" /></div>
+    <div class="scenery__layer" data-img="6"><img data-src="Images/7.jpg" alt="" /></div>
+    <div class="scenery__fog"></div>
+  </div>
+
+  <!-- ============ PERSISTENT ATMOSPHERE OVERLAYS ============ -->
+  <!-- Layered, fixed, pointer-events:none. These are what make the seven images one soul. -->
+  <div class="grade" id="grade" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <canvas class="snow snow--back" id="snowBack" aria-hidden="true"></canvas>
+  <canvas class="snow snow--front" id="snowFront" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="letterbox" aria-hidden="true"></div>
+
+  <!-- ============ FIXED UI ============ -->
+  <a class="brand" href="#scene-1" aria-label="Screen Monk, return to top">
+    <span class="brand__glyph" aria-hidden="true">
+      <img src="screen monk logo.png" alt="" width="36" height="36" />
+    </span>
+    <span class="brand__word">Screen Monk</span>
+  </a>
+
+  <!-- Top-right CTA cluster: the music toggle on the right
+       (flush at the corner), with the "skip to download"
+       shortcut immediately to its left. The two share a single
+       positioning context so they read as one visual unit.
+       Hidden on the warm scene (7). -->
+  <div class="top-cta-stack" id="topCtaStack">
+    <a class="skip-download" href="#scene-7" id="skipDownload" aria-label="Skip ahead to the download">
+      <svg class="skip-download__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      <span class="skip-download__text">skip to download</span>
+    </a>
+    <button class="sound" id="soundToggle" data-state="playing" aria-pressed="true" aria-label="Pause music" title="Music on — click to pause">
+      <span class="sound__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <!-- speaker body — always visible -->
+          <path class="sound__body" d="M4 9v6h4l5 4V5L8 9H4z"/>
+          <!-- sound waves — visible when playing -->
+          <g class="sound__waves">
+            <path d="M16 8.5a5 5 0 0 1 0 7"/>
+            <path d="M18.5 6a8.5 8.5 0 0 1 0 12"/>
+          </g>
+          <!-- soft "tap to start" indicator — visible when blocked, hints that
+               a single tap will wake the music up. Two short strokes, no X
+               (we are not muted, just waiting). -->
+          <g class="sound__hint">
+            <circle cx="18" cy="12" r="0.9" fill="currentColor" stroke="none"/>
+            <circle cx="20.5" cy="12" r="0.9" fill="currentColor" stroke="none"/>
+          </g>
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  <nav class="rail" id="rail" aria-label="Chapter navigation">
+    <ul>
+      <li><a href="#scene-1" data-rail="1"><span class="rail__dot"></span><span class="rail__label">The Peak</span></a></li>
+      <li><a href="#scene-2" data-rail="2"><span class="rail__dot"></span><span class="rail__label">The Descent</span></a></li>
+      <li><a href="#scene-3" data-rail="3"><span class="rail__dot"></span><span class="rail__label">The Watcher</span></a></li>
+      <li><a href="#scene-4" data-rail="4"><span class="rail__dot"></span><span class="rail__label">The Tablets</span></a></li>
+      <li><a href="#scene-5" data-rail="5"><span class="rail__dot"></span><span class="rail__label">The Bowl</span></a></li>
+      <li><a href="#scene-6" data-rail="6"><span class="rail__dot"></span><span class="rail__label">The Vault</span></a></li>
+      <li><a href="#scene-7" data-rail="7"><span class="rail__dot"></span><span class="rail__label">The Return</span></a></li>
+      <li><a href="#credits" data-rail="8"><span class="rail__dot"></span><span class="rail__label">The Monk</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- Background music — one ambient track, loops across the whole site.
+       On by default; the button below toggles play/pause. If the browser
+       blocks autoplay, audio.js surfaces a "tap to start" hint and
+       installs a transparent page-wide click target so the user's first
+       scroll/click/tap on the page starts the music. -->
+  <audio id="ambientMusic"
+         src="[no copyright music] 'In Dreamland ' background music.mp3"
+         preload="auto"
+         loop
+         autoplay></audio>
+
+  <!-- Autoplay-blocked fallback: invisible full-screen click target.
+       Hidden by default; shown by audio.js when the browser rejected
+       the autoplay attempt. Catches the user's first scroll/click/tap
+       on the page and starts the music. The hint at the bottom makes
+       the affordance discoverable; the click target is transparent so
+       it doesn't visually disrupt the scene. The sound button (z-30)
+       and the brand/rail (z-30) sit above this overlay (z-25) so they
+       remain interactable. -->
+  <div class="music-start" id="musicStart" hidden aria-hidden="true">
+    <span class="music-start__hint" aria-hidden="true">
+      <span class="music-start__dot" aria-hidden="true"></span>
+      <span class="music-start__dot" aria-hidden="true"></span>
+      <span class="music-start__dot" aria-hidden="true"></span>
+      <span class="music-start__label">scroll or tap to start the music</span>
+    </span>
+  </div>
+
+  <!-- ============ THE SEVEN SCENES ============ -->
+  <main class="scenes" id="scenes">
+
+    <!-- I — THE PEAK -->
+    <section class="scene" id="scene-1" data-scene="peak" aria-label="The Peak">
+      <div class="scene__content scene__content--center">
+        <h1 class="display" data-reveal="display">Somewhere, someone is not<br>looking at their screen.</h1>
+        <p class="lede" data-reveal="lede">He sits where the air is thin and the signal does not reach, and watches the valley of lit screens below. He asks nothing of it. He is only here.</p>
+      </div>
+    </section>
+
+    <!-- II — THE DESCENT -->
+    <section class="scene" id="scene-2" data-scene="descent" aria-label="The Descent">
+      <div class="scene__content scene__content--center">
+        <h2 class="display" data-reveal="display">You arrive without a door to open.</h2>
+      </div>
+    </section>
+
+    <!-- III — THE WATCHER -->
+    <section class="scene" id="scene-3" data-scene="watcher" aria-label="The Watcher">
+      <div class="scene__content scene__content--center">
+        <h2 class="display" data-reveal="display">He notices which hours were taken from you.</h2>
+        <p class="lede" data-reveal="lede">Not to scold. Not to score. He simply keeps a quiet count of where the morning went &mdash; the way snow keeps the shape of a single footprint &mdash; and offers that count to no one but you.</p>
+      </div>
+    </section>
+
+    <!-- IV — THE TABLETS -->
+    <section class="scene" id="scene-4" data-scene="tablets" aria-label="The Tablets">
+      <div class="scene__content scene__content--center">
+        <h2 class="display" data-reveal="display">Hours, written in snow.</h2>
+        <p class="lede" data-reveal="lede">Your days laid out plainly, without colour or alarm. Glance once and they are there for you. Look away, and they ask nothing of you until you choose to return.</p>
+      </div>
+    </section>
+
+    <!-- V — THE BOWL -->
+    <section class="scene" id="scene-5" data-scene="bowl" aria-label="The Bowl">
+      <div class="scene__content scene__content--center">
+        <h2 class="display" data-reveal="display">The mountain watches the hours pass.</h2>
+        <p class="lede" data-reveal="lede">It does not hurry them. It does not demand them back. You sit, or you do not — the hours are yours either way, and the mountain is patient with both.</p>
+      </div>
+    </section>
+
+    <!-- VI — THE VAULT -->
+    <section class="scene" id="scene-6" data-scene="vault" aria-label="The Vault">
+      <div class="scene__content scene__content--center">
+        <h2 class="display" data-reveal="display">Nothing leaves this cave.</h2>
+        <p class="lede" data-reveal="lede">Not your name. Not your hours. Not a single byte. What enters stays, sealed in the stone of your own machine &mdash; where no company and no cloud can reach.</p>
+
+        <ul class="counter" id="counter" aria-label="A count of what Screen Monk has sent, received, and shared with anyone outside this machine — all zero, always.">
+          <li><span class="counter__n" data-count="0">0</span><span class="counter__u">bytes sent</span></li>
+          <li><span class="counter__sep" aria-hidden="true">/</span></li>
+          <li><span class="counter__n" data-count="0">0</span><span class="counter__u">bytes received</span></li>
+          <li><span class="counter__sep" aria-hidden="true">/</span></li>
+          <li><span class="counter__n" data-count="0">0</span><span class="counter__u">who know you</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- VII — THE RETURN (the only warmth) -->
+    <section class="scene scene--warm" id="scene-7" data-scene="return" aria-label="The Return">
+      <div class="scene__content scene__content--top scene__content--split">
+        <div class="scene__col scene__col--text">
+          <h2 class="display display--warm" data-reveal="display">Take a small piece of stillness,<br>home with you.</h2>
+          <p class="lede lede--warm" data-reveal="lede">Screen Monk lives quietly in the corner of your machine, keeping your hours the way the mountain keeps the snow. For Windows. Nothing more is required of you than to let it sit.</p>
+        </div>
+
+        <div class="scene__col scene__col--cta">
+          <div class="cta" id="cta">
+            <a class="cta__btn cta__btn--primary" id="ctaInstaller" href="#" data-ready="false">
+              <span class="cta__label">Download for Windows</span>
+              <span class="cta__sub" id="ctaInstallerSub">installer &middot; 1.0.2</span>
+            </a>
+            <p class="cta__note" id="ctaNote" hidden></p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =========================================================
+         CREDITS PHASE — a dedicated moment after the picture.
+         Reads like the end of a quiet film: a thin rule, a
+         whisper, the credits block, a year. Cold throughout —
+         warmth belongs to the button above.
+         ========================================================= -->
+    <section class="credits-phase" id="credits" data-scene="monk" aria-label="The Monk">
+      <div class="credits-phase__inner">
+
+        <div class="credits-phase__brand">
+          <span class="credits-phase__rule" aria-hidden="true"></span>
+          <span class="credits-phase__brand-text">Screen Monk</span>
+          <span class="credits-phase__rule" aria-hidden="true"></span>
+        </div>
+
+          <p class="credits-phase__tag">v3.0.4 &middot; Windows &middot; ~123 MB</p>
+
+        <p class="credits-phase__made">made quietly by</p>
+
+        <p class="credits-phase__name">Srinivas Jangiti</p>
+
+        <ul class="credits-phase__links">
+          <li><a href="https://www.linkedin.com/in/srinivasajan/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          <li><a href="https://x.com/sriwanders" target="_blank" rel="noopener noreferrer">X</a></li>
+          <li><a href="https://substack.com/@sriwanders" target="_blank" rel="noopener noreferrer">Substack</a></li>
+          <li><a href="https://medium.com/@sriwanders" target="_blank" rel="noopener noreferrer">Medium</a></li>
+          <li><a href="https://www.youtube.com/@srinivasjan" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+        </ul>
+
+        <p class="credits-phase__contact">
+          <a href="mailto:srinivasajan.work@gmail.com">srinivasajan.work@gmail.com</a>
+        </p>
+        <p class="credits-phase__phone">
+          <a href="tel:+918767505121">+91 8767505121</a>
+        </p>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ INLINE: BACKGROUND MUSIC ============
+       Whole audio module lives in the HTML — no separate file to
+       load, no module ordering, no cache mismatches. Three things
+       matter here:
+         1. autoplay (HTML attribute + JS call) — fire-and-forget
+         2. synchronous user-event handlers — scroll / wheel /
+            touchmove / pointerdown / touchstart / keydown / click.
+            Each one checks "is scene 2 in view?" and calls play()
+            directly inside the real user gesture, so the browser
+            treats it as user-activated. (rAF-scheduled play() is
+            NOT user-activated in Safari — that's why earlier
+            versions didn't fire for some users.)
+         3. button toggle + "tap to start" overlay for the
+            autoplay-blocked case. -->
+  <script>
+  (function () {
+    "use strict";
+
+    var BUILD = "audio-2026-07-11-006-simpler";
+
+    var music = document.getElementById("ambientMusic");
+    var btn = document.getElementById("soundToggle");
+    var overlay = document.getElementById("musicStart");
+    var scene2 = document.getElementById("scene-2");
+    if (!music) return;
+
+    music.volume = 0.32;
+
+    function showOverlay(on) {
+      if (!overlay) return;
+      overlay.hidden = !on;
+      overlay.setAttribute("aria-hidden", on ? "false" : "true");
+    }
+
+    function syncBtn() {
+      if (!btn) return;
+      var playing = !music.paused;
+      var blocked = !!overlay && !overlay.hidden;
+      var s = playing ? "playing" : (blocked ? "blocked" : "paused");
+      btn.setAttribute("data-state", s);
+      btn.setAttribute("aria-pressed", playing ? "true" : "false");
+    }
+
+    function start() {
+      if (!music.paused) { showOverlay(false); syncBtn(); return; }
+      var p = music.play();
+      if (p && p.then) {
+        p.then(function () { showOverlay(false); syncBtn(); })
+         .catch(function () { showOverlay(true);  syncBtn(); });
+      }
+    }
+
+    function stop() {
+      music.pause();
+      showOverlay(false);
+      syncBtn();
+    }
+
+    // "Is scene 2 in view?" — runs synchronously inside a real
+    // user-gesture handler so play() counts as user-activated.
+    function maybeStart() {
+      if (!scene2) return;
+      var r = scene2.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight) start();
+    }
+
+    // Every real user-event we can think of. passive:true where
+    // we don't preventDefault. Each one runs play() inside the
+    // user gesture, which is what the browser needs.
+    //
+    // IMPORTANT: all document-level gesture handlers must skip the
+    // sound button. If we don't, mousedown fires start() → music
+    // plays, then the button's own click handler sees music is
+    // playing and calls stop() — a self-cancelling race. The button
+    // is the sole owner of its own toggle.
+    function isBtn(e) {
+      return e && e.target && e.target.closest && e.target.closest("#soundToggle");
+    }
+    function onGesture(e) { if (!isBtn(e)) start(); }
+    function onGestureBtn(e) { if (isBtn(e))  start(); }
+
+    window.addEventListener("scroll",    maybeStart, { passive: true });
+    window.addEventListener("wheel",     maybeStart, { passive: true });
+    window.addEventListener("touchmove", maybeStart, { passive: true });
+    document.addEventListener("pointerdown", onGesture);
+    document.addEventListener("mousedown",   onGesture);
+    document.addEventListener("touchstart",  onGesture, { passive: true });
+    document.addEventListener("keydown",     onGesture);
+    document.addEventListener("click",       onGesture);
+    if (overlay) {
+      overlay.addEventListener("click",       start);
+      overlay.addEventListener("pointerdown", start);
+    }
+
+    // Button owns its own click — and only its own click.
+    if (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (music.paused) start(); else stop();
+      });
+    }
+
+    // Optimistic autoplay attempt.
+    start();
+    // If autoplay was rejected, surface the overlay so the user
+    // knows to interact. 600ms is generous for Safari.
+    setTimeout(function () {
+      if (music.paused) { showOverlay(true); syncBtn(); }
+    }, 600);
+
+    // Minimal API for tests / debug.
+    window.ScreenMonkAudio = {
+      available: true,
+      build: BUILD,
+      get state() { return music.paused ? (overlay && !overlay.hidden ? "blocked" : "paused") : "playing"; },
+      isPlaying: function () { return !music.paused; },
+      readyState: function () { return music.readyState; },
+      lastError: function () { return music.error; },
+      start: start,
+      stop:  stop
+    };
+
+    console.info("[Screen Monk audio] " + BUILD + " booted");
+
+    // Optional debug overlay: append ?debug=audio to the URL.
+    if (/[?&]debug=audio\b/.test(location.search)) {
+      var dbg = document.createElement("div");
+      dbg.style.cssText =
+        "position:fixed;left:12px;bottom:12px;z-index:9999;" +
+        "font:11px/1.4 ui-monospace,Consolas,monospace;color:#9fb0c8;" +
+        "background:rgba(5,8,15,.85);padding:8px 10px;" +
+        "border:1px solid #2a3548;border-radius:4px;" +
+        "pointer-events:none;white-space:pre;max-width:90vw;";
+      document.body.appendChild(dbg);
+      setInterval(function () {
+        var src = "";
+        try {
+          src = (music.currentSrc || music.src || "").split("/").pop();
+          if (src.length > 60) src = src.substring(0, 57) + "...";
+        } catch (_) { src = "?"; }
+        var s2 = scene2 ? scene2.getBoundingClientRect() : null;
+        var vh = window.innerHeight;
+        var s2In = s2 ? (s2.bottom > 0 && s2.top < vh) : false;
+        dbg.textContent =
+          "build:    " + BUILD + "\n" +
+          "audio:    " + (music.paused ? "paused" : "playing") + "\n" +
+          "ready:    " + music.readyState + "\n" +
+          "error:    " + (music.error ? "c" + music.error.code : "none") + "\n" +
+          "src:      " + src + "\n" +
+          "btn:      " + (btn ? btn.getAttribute("data-state") : "?") + "\n" +
+          "overlay:  " + (overlay && overlay.hidden ? "hidden" : "shown") + "\n" +
+          "scene2:   " + (s2In ? "in view" : "off-screen");
+      }, 250);
+    }
+  })();
+  </script>
+
+  <!-- ============ SCRIPTS (classic, not modules, so it runs from file:// too) ============ -->
+  <script src="js/snow.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/vault.js"></script>
+  <script src="js/download.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
