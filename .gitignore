@@ -3,6 +3,12 @@ test/
 .bug-review/
 node_modules/
 
+# Windows installers / portable builds.
+# These are hosted as GitHub Release assets (not committed to the repo).
+# Vercel doesn't fetch Git LFS files at deploy time, so committing the
+# EXE either way would result in a 134-byte LFS pointer being served.
+*.exe
+
 # OS junk
 .DS_Store
 Thumbs.db

@@ -1,3 +1,5 @@
-# Track Windows binaries via Git LFS. Without this, the installer
-# would exceed GitHub's 100 MB hard limit for regular commits.
-*.exe filter=lfs diff=lfs merge=lfs -text
+# Windows binaries used to be tracked here via Git LFS. The LFS
+# pointers were served by Vercel (only 134 bytes — the pointer text,
+# not the actual file) and the download button gave users a broken
+# non-executable. Binaries are now hosted as GitHub Release assets
+# instead; the website's download button points to the release URL.

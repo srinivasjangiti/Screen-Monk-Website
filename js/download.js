@@ -17,13 +17,24 @@
   // They are intentionally data-driven so no other code needs to change.
   // ---------------------------------------------------------------------------
   var CONFIG = {
-    // Builds live alongside index.html inside the Website folder, so the
-    // download links resolve relative to the page itself. Use encodeURI to
-    // survive the space in the installer filename.
-    installer: encodeURI("Screen Monk-Setup-3.0.4.exe"),
+    // Hosted as a GitHub Release asset (not committed to this repo).
+    // Vercel does not fetch Git LFS files at deploy time, so committing
+    // the EXE resulted in a 134-byte LFS pointer being served instead
+    // of the actual 123 MB installer. The release URL is version-pinned
+    // via the /releases/latest/ alias — bumping the version on a new
+    // release is enough to update the download, no website change needed.
+    //   - For each new version: `gh release create vX.Y.Z ./installer.exe`
+    //   - The user-facing filename on save is overridden by the
+    //     `download` attribute set in applyLinks() below.
+    installer: "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/latest/download/Screen.Monk-Setup-3.0.4.exe",
     // Portable build is in progress; for now both buttons point at the
-    // installer. Replace with the portable filename + size when ready.
-    portable:  encodeURI("Screen Monk-Setup-3.0.4.exe"),
+    // installer. Replace with the portable URL + size when ready.
+    portable:  "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/latest/download/Screen.Monk-Setup-3.0.4.exe",
+    // What the browser should name the file when the user saves it
+    // (overrides the URL-derived name, which has a dot where the
+    // original filename has a space — GitHub release storage normalizes
+    // spaces to dots on upload).
+    saveAs: "Screen Monk-Setup-3.0.4.exe",
     version: "3.0.4",
     sizeInstaller: "~123 MB",
     sizePortable:  "~123 MB",
@@ -63,7 +74,7 @@
     if (installer) {
       if (isWindows) {
         installer.setAttribute("href", CONFIG.installer);
-        installer.setAttribute("download", "");
+        installer.setAttribute("download", CONFIG.saveAs || "");
         installer.removeAttribute("aria-disabled");
         installer.setAttribute("data-ready", "true");
       } else {
@@ -80,7 +91,7 @@
     if (portable) {
       if (isWindows) {
         portable.setAttribute("href", CONFIG.portable);
-        portable.setAttribute("download", "");
+        portable.setAttribute("download", CONFIG.saveAs || "");
         portable.removeAttribute("aria-disabled");
         portable.setAttribute("data-ready", "true");
       } else {
