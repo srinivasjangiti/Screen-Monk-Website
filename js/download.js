@@ -20,16 +20,20 @@
     // Hosted as a GitHub Release asset (not committed to this repo).
     // Vercel does not fetch Git LFS files at deploy time, so committing
     // the EXE resulted in a 134-byte LFS pointer being served instead
-    // of the actual 123 MB installer. The release URL is version-pinned
-    // via the /releases/latest/ alias — bumping the version on a new
-    // release is enough to update the download, no website change needed.
-    //   - For each new version: `gh release create vX.Y.Z ./installer.exe`
-    //   - The user-facing filename on save is overridden by the
-    //     `download` attribute set in applyLinks() below.
-    installer: "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/latest/download/Screen.Monk-Setup-3.0.4.exe",
+    // of the actual 123 MB installer.
+    //
+    // Pinned to v3.0.4 (NOT /releases/latest/) so the browser follows
+    // one fewer redirect — `/latest/` 302s to the version tag first.
+    // To publish a new version:
+    //   1. gh release create vX.Y.Z ./Screen Monk-Setup-X.Y.Z.exe
+    //   2. bump the two URLs below + the version field
+    //   3. push the website
+    installer: "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/download/v3.0.4/Screen.Monk-Setup-3.0.4.exe",
     // Portable build is in progress; for now both buttons point at the
     // installer. Replace with the portable URL + size when ready.
-    portable:  "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/latest/download/Screen.Monk-Setup-3.0.4.exe",
+    portable:  "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/download/v3.0.4/Screen.Monk-Setup-3.0.4.exe",
+    // Release page (used as a fallback link if the direct download fails).
+    releasePage: "https://github.com/srinivasjangiti/Screen-Monk-Website/releases/tag/v3.0.4",
     // What the browser should name the file when the user saves it
     // (overrides the URL-derived name, which has a dot where the
     // original filename has a space — GitHub release storage normalizes
@@ -57,6 +61,7 @@
   var portable = document.getElementById("ctaPortable");
   var installerSub = document.getElementById("ctaInstallerSub");
   var note = document.getElementById("ctaNote");
+  var ctaCol = installer ? installer.closest(".scene__col--cta") : null;
 
   function detectOS() {
     var ua = (navigator.userAgent || "").toLowerCase();
@@ -107,6 +112,28 @@
       note.textContent = CONFIG.notWindowsNote;
     } else if (note) {
       note.hidden = true;
+    }
+
+    // Fallback: a quiet text link below the CTA that opens the GitHub
+    // release page in a new tab. Shown only on Windows so non-Windows
+    // visitors still see the on-brand "not yet visited" note. The
+    // release page lists the asset with a single-click download button
+    // that bypasses any cross-origin / Safe-Browsing interference some
+    // Chrome installs throw at direct binary downloads from a third
+    // party.
+    if (ctaCol) {
+      var fb = ctaCol.querySelector(".cta__fallback");
+      if (!fb && isWindows && CONFIG.releasePage) {
+        fb = document.createElement("p");
+        fb.className = "cta__fallback";
+        fb.innerHTML =
+          'If the download doesn\u2019t start, ' +
+          '<a href="' + CONFIG.releasePage + '" target="_blank" rel="noopener noreferrer">' +
+          'grab it from the GitHub release page</a>.';
+        ctaCol.querySelector(".cta").appendChild(fb);
+      } else if (fb && !isWindows) {
+        fb.parentNode && fb.parentNode.removeChild(fb);
+      }
     }
   }
 

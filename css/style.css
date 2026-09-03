@@ -948,6 +948,25 @@ body.is-warm .top-cta-stack { visibility: hidden; pointer-events: none; }
   font-size: 0.72rem; letter-spacing: 0.04em;
   color: var(--ember-soft); opacity: 0.8;
 }
+.cta__fallback {
+  margin-top: 1.2rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--ice-faint);
+  opacity: 0.7;
+  text-align: center;
+}
+.cta__fallback a {
+  color: var(--ice-dim);
+  text-decoration: underline;
+  text-decoration-color: rgba(201,214,227,0.25);
+  text-underline-offset: 3px;
+  transition: color var(--t-fast) var(--ease), text-decoration-color var(--t-fast) var(--ease);
+}
+.cta__fallback a:hover {
+  color: var(--ice);
+  text-decoration-color: var(--ice);
+}
 /* While download.js is still resolving the real links, the buttons must
    not be clickable (they would otherwise jump to the top via href="#"). */
 .cta__btn[data-ready="false"] {
