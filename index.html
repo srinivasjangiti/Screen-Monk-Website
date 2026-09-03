@@ -45,6 +45,11 @@
 
   <!-- Favicon: the monk's mark, inlined so no extra request -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' fill='%2305080f'/><path d='M24 8 C 30 18, 34 24, 34 31 a10 10 0 0 1 -20 0 C 14 24, 18 18, 24 8 Z' fill='none' stroke='%23c9d6e3' stroke-width='1.4' stroke-linecap='round'/><circle cx='24' cy='31' r='2.2' fill='%23c9d6e3'/></svg>" />
+  <link rel="icon" type="image/x-icon" href="Logo/icon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="Logo/icon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="Logo/icon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="Logo/icon-48.png" />
+  <link rel="apple-touch-icon" sizes="256x256" href="Logo/icon-256.png" />
 
   <title>Screen Monk — A quiet record of your hours.</title>
   <meta name="description" content="Screen Monk watches the time your screen takes, remembers it privately on your own machine, and never asks you to feel bad about any of it. For Windows." />
@@ -106,7 +111,7 @@
   <!-- ============ FIXED UI ============ -->
   <a class="brand" href="#scene-1" aria-label="Screen Monk, return to top">
     <span class="brand__glyph" aria-hidden="true">
-      <img src="screen monk logo.png" alt="" width="36" height="36" />
+      <img src="Logo/icon-48.png" alt="" width="36" height="36" />
     </span>
     <span class="brand__word">Screen Monk</span>
   </a>
@@ -164,10 +169,14 @@
        On by default; the button below toggles play/pause. If the browser
        blocks autoplay, audio.js surfaces a "tap to start" hint and
        installs a transparent page-wide click target so the user's first
-       scroll/click/tap on the page starts the music. -->
+       scroll/click/tap on the page starts the music.
+       preload="metadata" so the 2.6 MB file is only fetched when the
+       user actually starts the music, not on initial page load. The
+       user-gesture handlers in audio.js still call play() inside the
+       gesture, so autoplay behavior is unchanged. -->
   <audio id="ambientMusic"
          src="[no copyright music] 'In Dreamland ' background music.mp3"
-         preload="auto"
+         preload="metadata"
          loop
          autoplay></audio>
 
