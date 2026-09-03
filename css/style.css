@@ -1203,3 +1203,318 @@ body.is-warm .top-cta-stack { visibility: hidden; pointer-events: none; }
   .display, .lede { opacity: 1 !important; transform: none !important; }
   .grain { animation: none !important; }
 }
+
+/* =========================================================
+   CREDITS — PRIVACY POLICY LINK
+   A small, unobtrusive legal link placed beneath the existing
+   credits content. Quiet on its own, lifts to the page text
+   colour on hover, and uses the same plain-link vocabulary as
+   the contact line above it (no underline, no chip, no shadow).
+   The wrapper gets a generous top margin so the link reads as
+   a separate, slightly-further-away beat — the way year numerals
+   sit apart above it.
+   ========================================================= */
+.credits-phase__legal {
+  margin: 2.2rem 0 0;          /* breathing room below the phone line */
+  padding: 0;
+  text-align: center;
+}
+.credits-phase__legal a {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 0.66rem;          /* smaller than the contact line, almost a label */
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ice-faint);
+  opacity: 0.55;               /* a touch fainter than the year line */
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+}
+.credits-phase__legal a:hover,
+.credits-phase__legal a:focus-visible {
+  color: var(--ice);
+  opacity: 1;
+  outline: none;
+}
+
+/* =========================================================
+   LEGAL PAGES — privacy-policy.html
+   Same cold palette as the rest of the site, no scenery, no snow,
+   no music, no rail. One quiet document, designed to be readable
+   with JavaScript disabled, on a phone in bright sunlight or a
+   laptop in a dark room.
+   ========================================================= */
+body:has(.legal) {
+  /* Override the body that the index page locks with .is-loading.
+     The legal page never has a preloader. */
+  overflow: auto !important;
+  height: auto !important;
+  background: var(--void);
+}
+
+/* Top-left back link — same vocabulary as sign-in.html's "back". */
+.legal-back {
+  position: fixed;
+  top: 1.6rem;
+  left: 1.6rem;
+  z-index: 30;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ice-faint);
+  text-decoration: none;
+  opacity: 0.75;
+  transition: color var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+}
+.legal-back:hover,
+.legal-back:focus-visible {
+  color: var(--ice);
+  opacity: 1;
+  outline: none;
+}
+
+.legal {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: clamp(5rem, 12vh, 9rem) var(--gutter) clamp(4rem, 8vh, 6rem);
+  color: var(--ice-dim);
+}
+
+/* --- Document head --- */
+.legal__head {
+  text-align: center;
+  margin-bottom: clamp(2.4rem, 5vh, 3.6rem);
+}
+.legal__rule {
+  display: block;
+  width: clamp(2rem, 18vw, 6rem);
+  height: 1px;
+  margin: 0 auto 1.4rem;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(201,214,227,0.28) 50%,
+    transparent 100%);
+}
+.legal__eyebrow {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ice-faint);
+  margin: 0 0 0.9rem;
+}
+.legal__title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: 0.005em;
+  color: var(--ice);
+  margin: 0 0 1.4rem;
+}
+.legal__meta {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ice-faint);
+  margin: 0 0 2.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 0.9rem;
+}
+.legal__lede {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: var(--ice-dim);
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+/* --- Table of contents --- */
+.legal__toc {
+  margin: 0 0 clamp(2.4rem, 5vh, 3.6rem);
+  padding: 1.6rem 1.4rem;
+  border-top: 1px solid rgba(201,214,227,0.12);
+  border-bottom: 1px solid rgba(201,214,227,0.12);
+}
+.legal__toc-label {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ice-faint);
+  margin: 0 0 0.9rem;
+}
+.legal__toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 2;
+  column-gap: 2.2rem;
+}
+.legal__toc li {
+  break-inside: avoid;
+  margin: 0 0 0.55rem;
+}
+.legal__toc a {
+  font-family: var(--sans);
+  font-size: 0.84rem;
+  font-weight: 300;
+  line-height: 1.45;
+  color: var(--ice-dim);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease);
+}
+.legal__toc a:hover,
+.legal__toc a:focus-visible {
+  color: var(--ice);
+  outline: none;
+}
+
+/* --- Body sections --- */
+.legal__section {
+  margin: 0 0 clamp(2rem, 4vh, 2.8rem);
+  scroll-margin-top: 1.4rem;
+}
+.legal__h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(1.35rem, 2.6vw, 1.65rem);
+  line-height: 1.25;
+  letter-spacing: 0.005em;
+  color: var(--ice);
+  margin: 0 0 1.1rem;
+}
+.legal__h3 {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ice);
+  margin: 1.6rem 0 0.7rem;
+}
+.legal__section p,
+.legal__section li {
+  font-family: var(--sans);
+  font-size: 0.98rem;
+  font-weight: 300;
+  line-height: 1.75;
+  color: var(--ice-dim);
+  margin: 0 0 1rem;
+}
+.legal__section p:last-child { margin-bottom: 0; }
+.legal__section code {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.86rem;
+  background: rgba(201,214,227,0.06);
+  border: 1px solid rgba(201,214,227,0.10);
+  padding: 0.05em 0.4em;
+  border-radius: 3px;
+  color: var(--ice);
+}
+.legal__list {
+  list-style: none;
+  margin: 0.4rem 0 1.2rem;
+  padding: 0;
+}
+.legal__list li {
+  position: relative;
+  padding-left: 1.2rem;
+  margin: 0 0 0.55rem;
+}
+.legal__list li::before {
+  content: "·";
+  position: absolute;
+  left: 0.2rem;
+  top: -0.05em;
+  color: var(--ice-faint);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.legal__inline {
+  color: var(--ice);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201,214,227,0.22);
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.legal__inline:hover,
+.legal__inline:focus-visible {
+  color: var(--ice);
+  border-bottom-color: var(--ice);
+  outline: none;
+}
+.legal__contact {
+  margin: 1.4rem 0 0.4rem;
+}
+.legal__contact a {
+  font-family: var(--serif);
+  font-size: 1.18rem;
+  color: var(--ice);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201,214,227,0.22);
+  padding-bottom: 0.05em;
+  transition: border-color var(--t-fast) var(--ease);
+}
+.legal__contact a:hover,
+.legal__contact a:focus-visible {
+  border-bottom-color: var(--ice);
+  outline: none;
+}
+.legal__sign {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ice-faint);
+  margin-top: 2.4rem;
+}
+
+/* --- Foot --- */
+.legal__foot {
+  margin-top: clamp(3rem, 6vh, 4.4rem);
+  padding-top: 1.6rem;
+  border-top: 1px solid rgba(201,214,227,0.10);
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  color: var(--ice-faint);
+}
+.legal__foot p { margin: 0; }
+.legal__foot a {
+  color: var(--ice-dim);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease);
+}
+.legal__foot a:hover,
+.legal__foot a:focus-visible {
+  color: var(--ice);
+  outline: none;
+}
+
+/* --- Responsive --- */
+@media (max-width: 720px) {
+  .legal { padding-top: 4.5rem; }
+  .legal-back { top: 1.1rem; left: 1.1rem; font-size: 0.66rem; }
+  .legal__toc ol { columns: 1; }
+  .legal__section p,
+  .legal__section li { font-size: 0.96rem; line-height: 1.7; }
+  .legal__meta { font-size: 0.66rem; letter-spacing: 0.16em; }
+}
+
+@media (max-width: 420px) {
+  .legal__lede { font-size: 1rem; }
+  .legal__section p,
+  .legal__section li { font-size: 0.94rem; }
+  .legal__contact a { font-size: 1.05rem; }
+}

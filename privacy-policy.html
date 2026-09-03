@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+
+  <!--
+    Same defense-in-depth header posture as index.html. This page
+    is fully static and does not load any app scripts, so the CSP
+    is tightened: no inline script, no remote connections beyond
+    Google Fonts (typography only, same as the rest of the site).
+    The policy must remain readable with JavaScript disabled.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com data:;
+    img-src 'self' data:;
+    media-src 'self';
+    connect-src 'self';
+    base-uri 'self';
+    form-action 'self';
+    object-src 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Permissions-Policy" content="
+    camera=(),
+    microphone=(),
+    geolocation=(),
+    payment=(),
+    usb=(),
+    magnetometer=(),
+    accelerometer=(),
+    gyroscope=(),
+    interest-cohort=();" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' fill='%2305080f'/><path d='M24 8 C 30 18, 34 24, 34 31 a10 10 0 0 1 -20 0 C 14 24, 18 18, 24 8 Z' fill='none' stroke='%23c9d6e3' stroke-width='1.4' stroke-linecap='round'/><circle cx='24' cy='31' r='2.2' fill='%23c9d6e3'/></svg>" />
+  <link rel="icon" type="image/x-icon" href="Logo/icon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="Logo/icon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="Logo/icon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="Logo/icon-48.png" />
+  <link rel="apple-touch-icon" sizes="256x256" href="Logo/icon-256.png" />
+
+  <title>Screen Monk — Privacy Policy</title>
+  <meta name="description" content="Privacy Policy for Screen Monk, a privacy-first Windows screen-time and digital wellbeing application. Screen Monk runs entirely on your machine and does not send your data to anyone." />
+  <meta name="author" content="Screen Monk" />
+
+  <!-- Canonical URL for this page -->
+  <link rel="canonical" href="/privacy-policy" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Screen Monk — Privacy Policy" />
+  <meta property="og:description" content="How Screen Monk handles (and does not handle) your data. The short version: nothing leaves your machine." />
+  <meta property="og:url" content="/privacy-policy" />
+  <meta property="og:image" content="Images/6.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-cold>
+
+  <a class="legal-back" href="index.html" aria-label="Back to Screen Monk">← back</a>
+
+  <main class="legal" id="legal" aria-labelledby="legal-title">
+
+    <header class="legal__head">
+      <span class="legal__rule" aria-hidden="true"></span>
+      <p class="legal__eyebrow">Screen Monk</p>
+      <h1 class="legal__title" id="legal-title">Privacy Policy</h1>
+      <p class="legal__meta">
+        <span>Effective &middot; September 4, 2026</span>
+        <span aria-hidden="true">&middot;</span>
+        <span>Applies to Screen Monk v3.0.4 (Windows)</span>
+      </p>
+      <p class="legal__lede">
+        The short version: Screen Monk runs on your machine, keeps your
+        screen-time data on your machine, and does not send it anywhere.
+        This page explains exactly what that means in practice.
+      </p>
+    </header>
+
+    <nav class="legal__toc" aria-label="Sections in this policy">
+      <p class="legal__toc-label">Contents</p>
+      <ol>
+        <li><a href="#section-1">1. Introduction</a></li>
+        <li><a href="#section-2">2. Information Screen Monk Processes</a></li>
+        <li><a href="#section-3">3. How Screen Monk Uses Information</a></li>
+        <li><a href="#section-4">4. Local Storage and the Vault</a></li>
+        <li><a href="#section-5">5. Network Communications and Telemetry</a></li>
+        <li><a href="#section-6">6. Data Sharing and Disclosure</a></li>
+        <li><a href="#section-7">7. Third-Party Components</a></li>
+        <li><a href="#section-8">8. User Control</a></li>
+        <li><a href="#section-9">9. Security</a></li>
+        <li><a href="#section-10">10. Children's Privacy</a></li>
+        <li><a href="#section-11">11. Changes to This Privacy Policy</a></li>
+        <li><a href="#section-12">12. Contact</a></li>
+      </ol>
+    </nav>
+
+    <article class="legal__body">
+
+      <section class="legal__section" id="section-1" aria-labelledby="legal-h-1">
+        <h2 class="legal__h2" id="legal-h-1">1. Introduction</h2>
+        <p>
+          Screen Monk is a privacy-first, local-only screen-time and
+          digital wellbeing application for Windows. The application is
+          built around a single principle: a quiet record of your hours,
+          kept on your own machine, shared with no one.
+        </p>
+        <p>
+          This Privacy Policy describes the information Screen Monk
+          processes, where that information lives, what Screen Monk does
+          with it (and does not do with it), and the controls you have
+          over it. It applies to the Screen Monk desktop application for
+          Windows and to the Screen Monk website at
+          <a class="legal__inline" href="index.html">screenmonk.app</a>.
+        </p>
+        <p>
+          This is one universal policy. The same document is linked from
+          the Screen Monk website and is provided as the official Privacy
+          Policy for the Windows application, including for submission to
+          the Microsoft Store.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-2" aria-labelledby="legal-h-2">
+        <h2 class="legal__h2" id="legal-h-2">2. Information Screen Monk Processes</h2>
+        <p>
+          Screen Monk processes the following categories of information.
+          All of it is generated by the application running locally on
+          your computer, from signals already available to a program
+          running on your own machine.
+        </p>
+
+        <h3 class="legal__h3">Active application and window information</h3>
+        <p>
+          The name of the foreground process (for example, the executable
+          that produced the active window), the title of the active
+          window, and the time at which focus changed. This is the core
+          signal Screen Monk needs to know which application you are
+          using.
+        </p>
+
+        <h3 class="legal__h3">Application and process information</h3>
+        <p>
+          The display name and file path of each distinct executable
+          Screen Monk observes, a category you (or Screen Monk's
+          default rules) assign to it, and an optional icon extracted
+          from the executable. This lets Screen Monk show you a
+          recognisable list of apps instead of a list of process names.
+        </p>
+
+        <h3 class="legal__h3">Usage duration</h3>
+        <p>
+          The amount of time each application was in the foreground.
+          Screen Monk records one continuous span per (application,
+          window title) pair, and rolls these spans up into per-day and
+          per-hour summaries for the dashboard.
+        </p>
+
+        <h3 class="legal__h3">Idle and active state</h3>
+        <p>
+          Whether you are at the keyboard, derived from the Windows
+          <code>GetLastInputInfo</code> API. Idle periods are recorded
+          so Screen Monk can distinguish time you were away from your
+          machine from time you spent using it, and so it can suppress
+          reminders while you are already away.
+        </p>
+
+        <h3 class="legal__h3">System power and lock events</h3>
+        <p>
+          Whether the computer went to sleep, woke up, locked, or
+          unlocked. Screen Monk uses these as hard boundaries on
+          tracking so that suspended or locked time is never counted
+          as active use.
+        </p>
+
+        <h3 class="legal__h3">Browser website visits (best-effort)</h3>
+        <p>
+          For common browsers, Screen Monk extracts the website domain
+          from the active window title. Only the domain is stored; the
+          full page title, query string, and any other URL parameters
+          are not stored. Visits for which no domain can be reliably
+          detected are not recorded at all.
+        </p>
+
+        <h3 class="legal__h3">Focus sessions, limits, and goals</h3>
+        <p>
+          If you use the Focus feature, Screen Monk records the start
+          time, intended duration, allow-list of apps or domains, and
+          any distractions (apps you opened during a focus session).
+          If you set a daily or weekly limit on an application, the
+          limit and the mode (soft reminder or hard block) are stored
+          alongside the app record.
+        </p>
+
+        <h3 class="legal__h3">Categories, rules, and presets</h3>
+        <p>
+          Custom categories you create, title-pattern rules you define
+          for automatic categorisation, and focus presets you save. All
+          are stored locally so Screen Monk can apply them the next time
+          you use the application.
+        </p>
+
+        <h3 class="legal__h3">User-configured settings</h3>
+        <p>
+          Preferences you set inside the app: privacy mode, break
+          reminder interval, launch at startup, run-in-tray, retention
+          period, the path to your chosen Vault, the position of any
+          floating widget windows, and similar options. These live in
+          a small JSON configuration file in the application's user
+          data directory.
+        </p>
+
+        <h3 class="legal__h3">Local application logs</h3>
+        <p>
+          A short rolling log of application lifecycle events (start,
+          stop, errors) and boot diagnostics, written to a file inside
+          your Vault. These exist so the application can diagnose
+          problems on your own machine; they are not transmitted.
+        </p>
+
+        <h3 class="legal__h3">What Screen Monk does not collect</h3>
+        <p>
+          Screen Monk does not collect your name, email address, phone
+          number, account credentials, IP address, device identifiers,
+          precise location, contacts, calendar entries, photographs,
+          microphone or camera input, biometric data, or any other
+          personal information that is not generated by the application
+          itself while running on your machine.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-3" aria-labelledby="legal-h-3">
+        <h2 class="legal__h2" id="legal-h-3">3. How Screen Monk Uses Information</h2>
+        <p>
+          Information processed by Screen Monk is used only to provide
+          the application's features to you, on your machine. Concrete
+          uses include:
+        </p>
+        <ul class="legal__list">
+          <li>Recording screen-time by application, window title, and website domain.</li>
+          <li>Displaying daily, weekly, and monthly summaries on the dashboard and Analytics view.</li>
+          <li>Computing per-hour and per-day timelines and "top apps" lists.</li>
+          <li>Categorising applications and websites into the categories you (or the default rules) assign.</li>
+          <li>Tracking Focus sessions, recording distractions against the session's allow-list, and storing the resulting session record.</li>
+          <li>Enforcing daily and weekly application limits and surfacing reminders or blocks when a limit is reached.</li>
+          <li>Issuing break reminders when you have been active for a sustained period, and suppressing them when you are already away from the keyboard.</li>
+          <li>Displaying floating widgets you have enabled (for example, a clock or current app), positioned where you placed them.</li>
+          <li>Building a recognisable icon for each application from the executable, so the dashboard is readable.</li>
+          <li>Producing exports you explicitly request (CSV, JSON, or a backup of your Vault), saved to a location you choose.</li>
+          <li>Applying the data retention policy you have configured, by pruning old activity records after the retention window has passed.</li>
+        </ul>
+        <p>
+          Screen Monk does not use the information it processes for
+          advertising, profiling, audience segmentation, credit
+          scoring, employment decisions, or any other purpose outside
+          the application's own functionality.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-4" aria-labelledby="legal-h-4">
+        <h2 class="legal__h2" id="legal-h-4">4. Local Storage and the Vault</h2>
+        <p>
+          Screen Monk stores the information it processes on your
+          computer, in a directory called the <strong>Vault</strong>.
+          The Vault is a normal folder; you can open it in Windows
+          Explorer and inspect its contents at any time.
+        </p>
+        <p>
+          You choose where the Vault lives. The application prompts
+          you to pick a location during onboarding, remembers that
+          choice, and uses it on every subsequent launch. The default
+          location, if you do not pick one yourself, is a folder
+          inside the application's user data directory. You can move
+          the Vault to a different drive, an external drive, or a
+          cloud-synced folder at any time; doing so is a deliberate
+          choice on your part, not something Screen Monk initiates.
+        </p>
+        <p>
+          Inside the Vault, Screen Monk writes:
+        </p>
+        <ul class="legal__list">
+          <li>A SQLite database file (managed by the open-source <code>better-sqlite3</code> library) holding all activity, idle, focus, app, limit, category, rule, and summary records.</li>
+          <li>A folder of cached application icons extracted from the executables you have used.</li>
+          <li>An Exports folder containing any exports you choose to generate.</li>
+          <li>A Logs folder containing a short, rolling application log.</li>
+          <li>A small <code>.screenmonk-vault</code> marker file that identifies the folder as a Screen Monk Vault and stores its name and creation time.</li>
+        </ul>
+        <p>
+          In addition to the Vault, Screen Monk writes a small
+          <code>config.json</code> file in its user data directory
+          (managed by the open-source <code>electron-store</code>
+          library). This file holds preferences such as the path to
+          the current Vault, the position of any widget windows, and
+          whether the application should launch at startup. It does
+          not hold your activity history.
+        </p>
+        <p>
+          Screen Monk does not upload the contents of the Vault or
+          the configuration file to Screen Monk's servers, to any
+          third party, or to any cloud service. There is no automatic
+          cloud sync, no scheduled backup to a remote endpoint, and
+          no remote mirroring of any kind. If you want your Vault to
+          be backed up off this machine, you must arrange that
+          yourself (for example, by placing the Vault inside a folder
+          that your own cloud-storage client already syncs).
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-5" aria-labelledby="legal-h-5">
+        <h2 class="legal__h2" id="legal-h-5">5. Network Communications and Telemetry</h2>
+        <p>
+          Screen Monk does not contain analytics, telemetry, crash
+          reporting, error reporting, product usage tracking,
+          advertising, or automatic update services. The application
+          has no account system and no remote API of its own.
+        </p>
+        <p>
+          In normal use, the application does not initiate any
+          outbound network connection. The renderer process runs
+          under a Content Security Policy that restricts connections
+          to the application's own resources, which means third-party
+          services cannot be reached from the user interface even if
+          a future bug were to attempt it.
+        </p>
+        <p>
+          The single exception worth naming is one optional image
+          resource in the application's source code that would, if
+          reachable, request a website favicon from a third-party
+          service to display next to website-domain entries on the
+          Browser activity screen. In the released application, this
+          request is blocked by the renderer's Content Security
+          Policy, and the screen instead shows a small placeholder.
+          The request is therefore not made during normal use.
+        </p>
+        <p>
+          The application may also open an external link in your
+          default web browser when you click a clickable link inside
+          the application. This is initiated by you, the user, and
+          only the URL you clicked is passed to the operating system
+          to be opened in your browser of choice. Screen Monk does
+          not observe or record this action.
+        </p>
+        <p>
+          The Screen Monk website at <a class="legal__inline" href="index.html">screenmonk.app</a>
+          uses Google Fonts to serve the site's typography. No other
+          third-party requests are made by the website: no analytics
+          scripts, no advertising networks, no tracking pixels, and
+          no social-media embeds. The website's Content Security
+          Policy is published as a defense-in-depth measure to make
+          this a hard guarantee, not a soft one.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-6" aria-labelledby="legal-h-6">
+        <h2 class="legal__h2" id="legal-h-6">6. Data Sharing and Disclosure</h2>
+        <p>
+          Screen Monk does not sell, rent, lease, or trade any
+          information it processes. Screen Monk does not share your
+          information with advertisers, analytics providers, data
+          brokers, social networks, payment processors, marketing
+          platforms, or any other external party.
+        </p>
+        <p>
+          Because the information Screen Monk processes never leaves
+          your machine, Screen Monk has no information to disclose to
+          third parties, law enforcement, or other requesters. If a
+          third party seeks information about you, Screen Monk cannot
+          produce it, because Screen Monk does not hold it.
+        </p>
+        <p>
+          Screen Monk will only disclose information it actually
+          holds in narrow, legally compelled circumstances &mdash;
+          for example, a valid court order directed at Screen Monk
+          itself. In such a case, the response would be limited to
+          the information in Screen Monk's own possession (which is
+          none of your screen-time data, because that data is held
+          by you, on your machine, not by Screen Monk).
+        </p>
+        <p>
+          If Screen Monk is ever acquired or transfers its assets,
+          any information in Screen Monk's own possession would
+          transfer to the acquirer under the terms of this policy.
+          Again, because the substantive data lives in your Vault
+          and not with Screen Monk, this transfer is, by design, of
+          limited practical consequence.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-7" aria-labelledby="legal-h-7">
+        <h2 class="legal__h2" id="legal-h-7">7. Third-Party Components</h2>
+        <p>
+          The Screen Monk application uses a small number of
+          open-source software libraries, each chosen for running
+          locally on your machine. These libraries are not "data
+          recipients" in any privacy sense: they execute code inside
+          the application, on your computer, and do not contact
+          external services on your behalf.
+        </p>
+        <ul class="legal__list">
+          <li><strong>Electron</strong> &mdash; the application runtime that hosts the user interface.</li>
+          <li><strong>React</strong> &mdash; the user-interface library used to render the dashboard.</li>
+          <li><strong>better-sqlite3</strong> &mdash; a local SQLite library used to read and write the Vault database. No network activity.</li>
+          <li><strong>electron-store</strong> &mdash; a small JSON configuration store for application preferences. No network activity.</li>
+          <li><strong>koffi</strong> &mdash; a foreign-function interface used to call a small number of Windows system APIs (idle time, foreground window). No network activity.</li>
+        </ul>
+        <p>
+          The Screen Monk website uses Google Fonts to load the
+          site's typography. The request to Google Fonts reveals your
+          IP address and User-Agent to Google in the ordinary way
+          that any web request does; this is the only request the
+          website makes to any external service.
+        </p>
+        <p>
+          Screen Monk is not a data joint controller or processor
+          on behalf of any of the above. They are not given access
+          to your screen-time data, your Vault, or any other personal
+          information processed by Screen Monk.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-8" aria-labelledby="legal-h-8">
+        <h2 class="legal__h2" id="legal-h-8">8. User Control</h2>
+        <p>
+          Because your data lives on your machine, you have direct
+          and complete control over it. The following controls are
+          available to you.
+        </p>
+
+        <h3 class="legal__h3">Viewing your data</h3>
+        <p>
+          The application's dashboard, Apps view, Browser view,
+          Categories view, Timeline, and Analytics view let you
+          browse the data Screen Monk has recorded. You can also
+          open the Vault folder in Windows Explorer and inspect the
+          underlying SQLite database directly.
+        </p>
+
+        <h3 class="legal__h3">Exporting your data</h3>
+        <p>
+          The Vault screen lets you export your activity data as
+          CSV or JSON, and lets you create a local backup archive of
+          the entire Vault. Exports and backups are written to a
+          location you choose; they are not transmitted by Screen
+          Monk.
+        </p>
+
+        <h3 class="legal__h3">Deleting your data</h3>
+        <p>
+          You can delete individual records from inside the
+          application, clear all data for a specific application,
+          delete categories, rules, or focus presets, or delete the
+          entire Vault from the Vault screen. Deleting the Vault
+          folder is a normal folder delete in Windows Explorer and
+          is a permanent and complete way to remove all of your
+          screen-time data.
+        </p>
+
+        <h3 class="legal__h3">Privacy Mode and per-app overrides</h3>
+        <p>
+          A global Privacy Mode in Settings masks window titles
+          throughout the application. You can also set a per-app
+          privacy override so the titles for a specific app are
+          masked even when Privacy Mode is off. With Privacy Mode
+          enabled, Screen Monk still records which app you used and
+          for how long, but does not record the window title.
+        </p>
+
+        <h3 class="legal__h3">Retention</h3>
+        <p>
+          Settings includes a retention option. When enabled, Screen
+          Monk prunes activity records older than the configured
+          retention window once per day.
+        </p>
+
+        <h3 class="legal__h3">Uninstalling Screen Monk</h3>
+        <p>
+          The Windows uninstaller removes the application and the
+          default user data directory. The Vault folder you chose
+          is not touched by the uninstaller; if you also want to
+          remove the Vault, delete the Vault folder yourself before
+          or after uninstalling.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-9" aria-labelledby="legal-h-9">
+        <h2 class="legal__h2" id="legal-h-9">9. Security</h2>
+        <p>
+          Screen Monk is designed so that the most sensitive data it
+          holds &mdash; your screen-time history &mdash; lives on
+          your computer, under your control, and is not transmitted
+          to anyone. Beyond that baseline, the application applies a
+          number of reasonable safeguards:
+        </p>
+        <ul class="legal__list">
+          <li>The renderer process runs under a strict Content Security Policy that limits outbound network requests to the application's own resources.</li>
+          <li>Configuration and database files include corrupt-file recovery so that a partial write cannot render the application unusable.</li>
+          <li>A single-instance lock prevents the application from being launched in two windows at once, which would otherwise race on the same database file.</li>
+          <li>Application lifecycle errors are logged locally; the application surfaces a clear error message rather than failing silently.</li>
+          <li>Updates to Screen Monk are delivered through the official installer you downloaded; the application does not silently self-update from a remote endpoint.</li>
+        </ul>
+        <p>
+          No security design is perfect. Screen Monk does not
+          promise that the information on your machine is immune to
+          every possible attack. In particular, if your computer
+          itself is compromised, or if another user with access to
+          your computer opens the Vault, the contents of the Vault
+          can be read. Standard operating-system-level security
+          practices &mdash; keeping your operating system up to
+          date, using full-disk encryption where appropriate,
+          limiting who has access to your machine, and so on &mdash;
+          remain the foundation on which Screen Monk's local-only
+          design rests.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-10" aria-labelledby="legal-h-10">
+        <h2 class="legal__h2" id="legal-h-10">10. Children's Privacy</h2>
+        <p>
+          Screen Monk is a general-purpose productivity and
+          digital-wellbeing application for Windows. It is not
+          specifically designed for, and is not directed to,
+          children under the age of 13. Screen Monk does not
+          knowingly collect personal information from children,
+          and because the application does not collect personal
+          information from anyone, the distinction is largely
+          academic in practice: the data Screen Monk processes
+          comes from the computer the application is installed on,
+          not from any identified person.
+        </p>
+        <p>
+          If you are a parent or guardian and have questions about
+          Screen Monk's use on a child's computer, please contact
+          Screen Monk using the details in Section 12.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-11" aria-labelledby="legal-h-11">
+        <h2 class="legal__h2" id="legal-h-11">11. Changes to This Privacy Policy</h2>
+        <p>
+          Screen Monk may update this Privacy Policy from time to
+          time, for example when the application's behaviour
+          changes, when a new feature is added that processes a
+          new category of information, or when legal or regulatory
+          requirements change. The "Effective" date at the top of
+          this page records when the current version came into
+          effect.
+        </p>
+        <p>
+          When this policy changes in a way that materially affects
+          what information Screen Monk processes or how it is
+          handled, the change will also be announced inside the
+          application on next launch. Continued use of Screen Monk
+          after the effective date of an updated policy indicates
+          acceptance of the updated policy.
+        </p>
+      </section>
+
+      <section class="legal__section" id="section-12" aria-labelledby="legal-h-12">
+        <h2 class="legal__h2" id="legal-h-12">12. Contact</h2>
+        <p>
+          Questions, concerns, or requests about this Privacy
+          Policy or about Screen Monk's handling of information
+          can be sent to:
+        </p>
+        <p class="legal__contact">
+          <a class="legal__inline" href="mailto:srinivasajan.work@gmail.com">srinivasajan.work@gmail.com</a>
+        </p>
+        <p>
+          Screen Monk is an individual project by Srinivas Jangiti.
+          A response is usually sent within a few days; the
+          project is not a corporate entity, so formal data
+          protection officer roles do not apply.
+        </p>
+        <p class="legal__sign">
+          <span aria-hidden="true">&mdash;</span>
+          Screen Monk
+        </p>
+      </section>
+
+    </article>
+
+    <footer class="legal__foot">
+      <p>
+        <a class="legal__inline" href="index.html">← back to screenmonk.app</a>
+      </p>
+    </footer>
+
+  </main>
+
+</body>
+</html>

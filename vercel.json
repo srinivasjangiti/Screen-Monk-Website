@@ -34,7 +34,7 @@
       ]
     },
     {
-      "source": "/:path(index|sign-in).html",
+      "source": "/:path(index|sign-in|privacy-policy).html",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
@@ -54,6 +54,15 @@
     },
     {
       "source": "/sign-in",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/privacy-policy",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
         { "key": "X-Frame-Options", "value": "DENY" },
