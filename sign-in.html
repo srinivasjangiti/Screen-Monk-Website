@@ -34,7 +34,7 @@
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com data:;
     img-src 'self' data: https://img.clerk.com https://*.clerk.com;
-    connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com;
+    connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com http://127.0.0.1:* http://localhost:*;
     frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev;
     worker-src 'self' blob:;
     base-uri 'self';
@@ -117,6 +117,43 @@
     .signin__error.is-visible {
       display: block;
     }
+    .signin__success {
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #a8d5ba;
+      margin-top: 24px;
+      padding: 16px;
+      border: 1px solid #1f3a2c;
+      background: #091510;
+      border-radius: 2px;
+      display: none;
+    }
+    .signin__success.is-visible {
+      display: block;
+    }
+    .signin__retry {
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c9d6e3;
+      background: #161f2e;
+      border: 1px solid #2a384c;
+      padding: 10px 20px;
+      border-radius: 2px;
+      margin-top: 16px;
+      cursor: pointer;
+      display: none;
+      transition: background 0.15s ease;
+    }
+    .signin__retry:hover {
+      background: #1f2c40;
+    }
+    .signin__retry.is-visible {
+      display: inline-block;
+    }
     .signin__back {
       position: fixed;
       top: 24px;
@@ -150,6 +187,8 @@
 
       <div id="clerk-signin" role="region" aria-label="Sign in form"></div>
       <p class="signin__error" id="signinError" role="alert"></p>
+      <button type="button" class="signin__retry" id="signinRetry">Retry Handoff to App</button>
+      <div class="signin__success" id="signinSuccess" role="status"></div>
     </div>
   </main>
 
