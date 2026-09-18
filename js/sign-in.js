@@ -239,7 +239,25 @@
       }
     };
 
-    window.Clerk.mountSignIn(mountEl, { appearance: appearance });
+    // Keep the user on this exact page after sign-in completes.
+    // Without these, Clerk's mountSignIn auto-redirects to the Home URL
+    // after authentication, destroying the JS context before the loopback
+    // POST can execute — which is the entire point of this page.
+    var currentUrl = window.location.href;
+    window.Clerk.mountSignIn(mountEl, {
+      appearance: appearance,
+      afterSignInUrl: currentUrl,
+      fallbackRedirectUrl: currentUrl,
+    });
+
+    // Handle the post-redirect case: if Clerk still reloaded the page
+    // (e.g. due to session tasks or internal navigation), the state and
+    // port params survive in the URL. Check immediately whether Clerk
+    // already has an active session and attempt the handoff right away.
+    if (window.Clerk.session && !handedOff) {
+      currentSession = window.Clerk.session;
+      deliverTokenToApp(window.Clerk.session);
+    }
 
     // When signed in, perform loopback POST handoff
     window.Clerk.addListener(async function ({ user, session }) {
