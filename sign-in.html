@@ -30,12 +30,12 @@
   -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev;
+    script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.protect.clerk.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com data:;
     img-src 'self' data: https://img.clerk.com https://*.clerk.com;
-    connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com http://127.0.0.1:* http://localhost:*;
-    frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev;
+    connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://*.protect.clerk.com:* http://127.0.0.1:* http://localhost:*;
+    frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.protect.clerk.com;
     worker-src 'self' blob:;
     base-uri 'self';
     form-action 'self';
