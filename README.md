@@ -43,7 +43,7 @@ Website/
 │   ├── audio.js        # Background music (MP3): play/pause + autoplay fallback
 │   ├── focus.js        # The Bowl's 25-min focus veil + countdown (Esc to return)
 │   ├── vault.js        # The privacy counter (stays zero; pulses to feel alive)
-│   ├── download.js     # OS detection + real .exe links (edit CONFIG here)
+│   ├── download.js     # Microsoft Store routing + platform messaging
 │   └── main.js         # Boot sequence, preloader, reduced-motion, a11y (music lives in audio.js)
 └── Images/
     ├── 1.jpg  →  I    · The Peak       (hero — the watcher on the mountain)
@@ -61,7 +61,7 @@ Website/
     ├── audio.js        # Background music (MP3): play/pause + autoplay fallback
     ├── focus.js        # The Bowl's 25-min focus veil + countdown (Esc to return)
     ├── vault.js        # The privacy counter (stays zero; pulses to feel alive)
-    ├── download.js     # OS detection + real .exe links (edit CONFIG here)
+    ├── download.js     # Microsoft Store routing + platform messaging
     └── main.js         # Boot sequence, preloader, reduced-motion, a11y (music lives in audio.js)
 
 ---
@@ -114,28 +114,21 @@ the screen is empty or jarring — the descent is continuous.
 
 ---
 
-## Download links — where to edit for production
+## Download links — Microsoft Store routing
 
-All download config lives at the top of **`js/download.js`**, in the `CONFIG`
-object. Edit those two URLs when you move to a real host / CDN:
+All download configuration lives at the top of **`js/download.js`**, in the `CONFIG`
+object, routing users to the official Microsoft Store listing:
 
 ```js
 var CONFIG = {
-  installer: "https://your-cdn.example/Screen Monk Setup 1.0.2.exe",
-  portable:  "https://your-cdn.example/ScreenMonk-1.0.2-portable.exe",
-  version:   "1.0.2",
+  storeUrl: "https://apps.microsoft.com/detail/9p0zb405dsfr?hl=en-GB&gl=IN",
+  supportingText: "Official Microsoft Store",
   // ...
 };
 ```
 
-For local/file use it already points at the builds sitting next to
-`index.html` inside the Website folder:
-
-- `Screen Monk Setup 1.0.2.exe` — NSIS installer (~87 MB)
-- `ScreenMonk-1.0.2-portable.exe` — portable build (~87 MB)
-
-On non-Windows the buttons are disabled (`aria-disabled="true"`) and a gentle
-on-brand note explains why, instead of triggering a confusing `.exe` download.
+On non-Windows platforms, a gentle on-brand note explains that Screen Monk is built
+for Windows, while the Store link remains active and accessible.
 
 ---
 
@@ -230,5 +223,5 @@ When deploying, **do not upload these folders to production**:
   public web.
 - `node_modules/` — only needed for the test suite, never for serving.
 
-The `Screen Monk-Setup-3.0.4.exe` in the project root is the real installer
-for v3.0.4. It is the same binary the production download CTA points at.
+The official distribution for Screen Monk is hosted on the Microsoft Store:
+https://apps.microsoft.com/detail/9p0zb405dsfr?hl=en-GB&gl=IN
