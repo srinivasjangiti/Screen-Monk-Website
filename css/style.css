@@ -513,6 +513,7 @@ body.is-warm .music-start__hint { color: var(--ember-soft); }
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform: translateX(50px);
 }
 #scene-7 .display {
   font-size: clamp(1.6rem, 2.4vw, 2.1rem);
@@ -1058,7 +1059,7 @@ body.is-warm .top-cta-stack { visibility: hidden; pointer-events: none; }
   .scene__content { width: 92vw; }
   .counter { gap: 0.8rem; padding: 1rem 1.2rem; flex-wrap: wrap; justify-content: center; }
   #scene-7 .scene__content { justify-content: center; padding-right: 0; margin-top: 12vh; }
-  #scene-7 .scene__col--text { margin: 0 auto; max-width: 90vw; }
+  #scene-7 .scene__col--text { margin: 0 auto; max-width: 90vw; transform: none; }
   #scene-7 .display {
     color: #fff5e6;
     text-shadow: 0 2px 20px rgba(5, 8, 15, 0.95), 0 0 40px rgba(5, 8, 15, 0.75);
