@@ -239,8 +239,11 @@ body.is-cinematic .letterbox::after { height: var(--letterbox-h); }
   letter-spacing: 0.2em; line-height: 1;
   text-shadow: 0 1px 16px rgba(5,8,15,0.8);
 }
-body.is-warm .brand { color: var(--ember-soft); }
-body.is-warm .brand__word { text-shadow: 0 1px 16px rgba(20,12,6,0.6); }
+body.is-warm .brand { color: #1a0f04; }
+body.is-warm .brand__word {
+  font-weight: 500;
+  text-shadow: 0 1px 20px rgba(255, 235, 210, 0.5), 0 0 1px rgba(26, 15, 4, 0.3);
+}
 
 /* Right-side chapter rail */
 .rail {
@@ -268,6 +271,7 @@ body.is-warm .brand__word { text-shadow: 0 1px 16px rgba(20,12,6,0.6); }
 .rail a:hover { color: var(--ice); }
 .rail a.is-active { color: var(--ice); }
 .rail a.is-active .rail__dot { transform: scale(1.6); opacity: 1; }
+body.is-warm .rail { right: clamp(1rem, 2.5vw, 2.5rem); }
 body.is-warm .rail a.is-active { color: var(--ember); }
 body.is-warm .rail a.is-active .rail__dot { background: var(--ember); }
 
@@ -513,15 +517,17 @@ body.is-warm .music-start__hint { color: var(--ember-soft); }
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: translateX(50px);
+  transform: translate(85px, 65px);
 }
 #scene-7 .display {
+  font-weight: 600;
   font-size: clamp(1.6rem, 2.4vw, 2.1rem);
   line-height: 1.15; margin-bottom: 0.85rem;
   color: #1a0f04;
   text-shadow: 0 1px 25px rgba(255, 235, 210, 0.4);
 }
 #scene-7 .lede {
+  font-weight: 400;
   font-size: clamp(0.86rem, 1vw, 0.96rem);
   line-height: 1.65;
   max-width: 38ch; margin: 0 auto 0.2rem;
@@ -533,6 +539,14 @@ body.is-warm .music-start__hint { color: var(--ember-soft); }
   padding: 0.85rem 2rem;
   min-width: 260px;
 }
+#scene-7 .cta__label {
+  font-weight: 600;
+}
+#scene-7 .cta__sub {
+  font-weight: 600;
+  opacity: 0.88;
+  letter-spacing: 0.16em;
+}
 
 /* Reveal animations — elements start invisible & lifted, JS adds .is-in */
 .display {
@@ -540,7 +554,11 @@ body.is-warm .music-start__hint { color: var(--ember-soft); }
   font-size: clamp(2.4rem, 6.2vw, 5rem);
   line-height: 1.06; letter-spacing: -0.005em;
   color: #ffffff;
-  text-shadow: 0 2px 40px rgba(5,8,15,0.7), 0 0 80px rgba(5,8,15,0.4);
+  text-shadow:
+    0 1px 2px rgba(5, 8, 15, 0.95),
+    0 2px 14px rgba(5, 8, 15, 0.85),
+    0 4px 35px rgba(5, 8, 15, 0.70),
+    0 0 60px rgba(5, 8, 15, 0.40);
   margin-bottom: 1.6rem;
   opacity: 0; transform: translateY(22px);
   transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
@@ -562,13 +580,14 @@ body.is-warm .music-start__hint { color: var(--ember-soft); }
 }
 .display em { font-style: italic; font-weight: 400; color: var(--ember-soft); }
 .lede {
-  font-family: var(--sans); font-weight: 300;
+  font-family: var(--sans); font-weight: 350;
   font-size: clamp(1.02rem, 1.5vw, 1.2rem);
   line-height: 1.85; letter-spacing: 0.015em;
-  color: var(--ice-dim);
-  /* single, clean dark drop shadow — strong enough to read on bright
-     backgrounds without needing per-scene "halo" stacks or color flips */
-  text-shadow: 0 1px 24px rgba(5,8,15,0.78);
+  color: #f0f5fb;
+  text-shadow:
+    0 1px 2px rgba(5, 8, 15, 1),
+    0 2px 10px rgba(5, 8, 15, 0.92),
+    0 0 24px rgba(5, 8, 15, 0.75);
   max-width: 46ch; margin: 0 auto;
   opacity: 0; transform: translateY(16px);
   transition: opacity var(--t-slow) var(--ease) 120ms, transform var(--t-slow) var(--ease) 120ms;
@@ -686,34 +705,52 @@ body.is-warm .top-cta-stack { visibility: hidden; pointer-events: none; }
   }
 }
 
-/* ---------- Soft tonal veil behind text on bright scenes ----------
-   On scenes where the background can wash out the lede (bright sky on 3,
-   peach sunset on 4, bright snow through 5), drop a soft halo behind
-   the text block so the words still read. Rules:
-     - veil element is inset:0 (matches the content box) so the dark
-       area can't extend past the content bounds
-     - gradient is 45% x 55% — slightly taller than wide, hugs the
-       text block vertically and stays inside the text on the sides
-     - center opacity 0.40 then 5-stop falloff to transparent at 100%
-       so the area beyond the text is fully clear
-     - matches the cold world's dark blue, not pure black, so it harmonises
-   The headline still rides on its own drop shadow; the veil just lifts
-   the tonal floor under the lede so the words don't dissolve. */
+/* ---------- Soft atmospheric contrast veils behind text on bright scenes ----------
+   Subtle, amorphous radial gradients with filter: blur() that soften bright background
+   areas (snow peaks, bright passes, snow fields, blizzards) behind headlines and ledes
+   without creating visible boxes, panels or card borders. Scoped strictly to scenes 1-6. */
+#scene-1 .scene__content::before,
+#scene-2 .scene__content::before,
 #scene-3 .scene__content::before,
+#scene-6 .scene__content::before {
+  content: "";
+  position: absolute;
+  inset: -14% -10%;
+  background: radial-gradient(ellipse 65% 60% at center,
+    rgba(5, 8, 15, 0.58) 0%,
+    rgba(5, 8, 15, 0.42) 28%,
+    rgba(5, 8, 15, 0.20) 55%,
+    rgba(5, 8, 15, 0.05) 75%,
+    transparent 100%);
+  filter: blur(24px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Bright snowy landscapes (Tablets & Bowl) need deeper ambient fog to keep
+   the typography sharp without requiring harsh boxes. */
 #scene-4 .scene__content::before,
 #scene-5 .scene__content::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 45% 55% at center,
-    rgba(5,8,15,0.40) 0%,
-    rgba(5,8,15,0.25) 20%,
-    rgba(5,8,15,0.12) 40%,
-    rgba(5,8,15,0.05) 65%,
+  inset: -16% -12%;
+  background: radial-gradient(ellipse 70% 65% at center,
+    rgba(5, 8, 15, 0.72) 0%,
+    rgba(5, 8, 15, 0.55) 32%,
+    rgba(5, 8, 15, 0.28) 60%,
+    rgba(5, 8, 15, 0.08) 80%,
     transparent 100%);
+  filter: blur(28px);
   z-index: -1;
   pointer-events: none;
 }
+
+/* Per-scene typography tuning for peak contrast */
+#scene-3 .lede { color: #f2f6fb; font-weight: 400; text-shadow: 0 1px 2px rgba(5,8,15,1), 0 2px 10px rgba(5,8,15,0.92), 0 0 20px rgba(5,8,15,0.8); }
+#scene-4 .display { text-shadow: 0 1px 3px rgba(5,8,15,1), 0 3px 18px rgba(5,8,15,0.95), 0 0 50px rgba(5,8,15,0.85); }
+#scene-4 .lede { color: #ffffff; font-weight: 400; text-shadow: 0 1px 2px rgba(5,8,15,1), 0 2px 10px rgba(5,8,15,0.95), 0 0 20px rgba(5,8,15,0.85); }
+#scene-5 .display { text-shadow: 0 1px 3px rgba(5,8,15,1), 0 3px 18px rgba(5,8,15,0.95), 0 0 50px rgba(5,8,15,0.85); }
+#scene-5 .lede { color: #ffffff; font-weight: 400; text-shadow: 0 1px 2px rgba(5,8,15,1), 0 2px 10px rgba(5,8,15,0.95), 0 0 20px rgba(5,8,15,0.85); }
 /* Scene 7 — no halo behind the CTA. Previous warm-dark plate was
    reading as a visible card silhouette, not a soft fall-off. The
    button carries its own weight: solid ember on the primary. The sun

@@ -31,6 +31,24 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
-
-.vercel
 .env*
+.vercel
+
+# Build output & caches
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+coverage/
+
+# Credentials, certificates & secrets
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.kdbx
+id_rsa*
+id_ed25519*
